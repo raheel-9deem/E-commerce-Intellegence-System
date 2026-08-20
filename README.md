@@ -1,109 +1,141 @@
-# E-Commerce Intelligent System
+# AI E-Commerce Intelligence Platform
 
-An end-to-end data science project built on the **Online Retail II** dataset — a real-world transactional dataset from a UK-based online retailer active between 2009 and 2011. The goal is to explore, clean, model, and derive actionable business intelligence from raw e-commerce data.
+An end-to-end analytics platform that turns raw e-commerce transaction data into actionable business intelligence. It segments customers, predicts churn risk, estimates customer lifetime value, recommends products, forecasts sales, flags anomalous transactions, and answers natural-language business questions through an AI analyst — all surfaced on an interactive dashboard.
+
+---
+
+## Features
+
+| Module | What it does |
+|---|---|
+| **Customer Segmentation** | RFM analysis + K-Means clustering to group customers into VIP / Regular / Occasional / At Risk |
+| **Churn Prediction** | Logistic Regression / Random Forest model to flag customers likely to stop purchasing |
+| **Customer Lifetime Value (CLV)** | Formula-based estimate of future customer value |
+| **Product Recommendations** | Popularity-based + item-based collaborative filtering |
+| **Sales Forecasting** | Prophet time-series model to predict future revenue |
+| **Demand Prediction** | Per-product forecast for top-selling items |
+| **Anomaly Detection** | Isolation Forest to flag suspicious/unusual transactions |
+| **AI Business Analyst** | Natural-language Q&A over business metrics, powered by an LLM |
+| **Executive Dashboard** | React + Tailwind dashboard visualizing all of the above |
 
 ---
 
 ## Dataset
 
-The dataset contains **1,067,371 transactions** across the following columns:
+Built on the **[Online Retail II](https://www.kaggle.com/datasets/mashlyn/online-retail-ii-uci)** dataset (UCI Machine Learning Repository) — ~1M transactions, ~5,900 customers, ~5,300 products, spanning Dec 2009–Dec 2011, across 43 countries.
 
-| Column       | Description                                      |
-|--------------|--------------------------------------------------|
-| Invoice      | Invoice number (unique per transaction)          |
-| StockCode    | Product code                                     |
-| Description  | Product name                                     |
-| Quantity     | Number of units purchased                        |
-| InvoiceDate  | Date and time of the transaction                 |
-| Price        | Unit price (GBP)                                 |
-| Customer ID  | Unique identifier for each customer              |
-| Country      | Customer's country of residence                  |
+---
 
-> **Source:** [UCI Machine Learning Repository – Online Retail II](https://archive.ics.uci.edu/dataset/502/online+retail+ii)
+## Tech Stack
+
+**Backend:** Python, FastAPI, Pydantic, SQLAlchemy, PostgreSQL
+**Data / ML:** Pandas, NumPy, Scikit-learn, Prophet, Isolation Forest
+**AI:** LLM API (Claude) for natural-language business Q&A
+**Frontend:** React, Tailwind CSS, Recharts / Plotly
+**Tooling:** Jupyter Notebooks, Git/GitHub, Docker (optional)
 
 ---
 
 ## Project Structure
 
 ```
+ai-ecommerce/
+│
+├── notebooks/                    # Exploratory & prototyping work
+│   ├── 01_data_exploration.ipynb
+│   ├── 02_data_cleaning.ipynb
+│   ├── 03_eda.ipynb
+│   ├── 04_rfm_segmentation.ipynb
+│   ├── 05_churn_prediction.ipynb
+│   ├── 06_recommendation.ipynb
+│   ├── 07_forecasting.ipynb
+│   └── 08_anomaly_detection.ipynb
+│
 ├── data/
-│   ├── raw/
-│   │   └── online_retail_II.csv          # Original dataset
-│   └── processed/
-│       ├── online_retail_sales_cleaned.csv  # Cleaned sales data
-│       └── online_retail_returns.csv        # Cancelled / returned orders
-├── notebooks/
-│   ├── 01_data_exploration.ipynb         # Initial EDA & dataset overview
-│   ├── 02_data_cleaning.ipynb            # Data cleaning & preprocessing
-│   └── ...                               # Future: analysis, modeling, segmentation
-├── requirements.txt
-├── LICENSE
-└── README.md
+│   ├── raw/                      # Original dataset
+│   └── processed/                # Cleaned CSVs
+│
+├── backend/
+│   ├── api/                      # FastAPI route files
+│   ├── models/                   # SQLAlchemy DB models
+│   ├── schemas/                  # Pydantic request/response schemas
+│   ├── services/                 # Business logic
+│   └── core/                     # Config, DB connection
+│
+├── ml/                           # Production ML modules (graduated from notebooks)
+│   ├── customer_segmentation/
+│   ├── churn_prediction/
+│   ├── recommendation/
+│   ├── forecasting/
+│   └── anomaly_detection/
+│
+├── ai/
+│   ├── query_templates/          # Predefined question → stat mappings
+│   └── llm_client/               # LLM API wrapper for natural-language answers
+│
+├── frontend/                     # React + Tailwind dashboard
+│
+├── database/                     # Migrations / seed scripts
+│
+├── tests/
+│
+├── docker/                       # Optional containerization
+│
+└── requirements.txt
 ```
 
 ---
 
-## Setup
+## Development Workflow
 
-### Prerequisites
+Every ML feature follows the same four-step cycle:
 
-- Python 3.10+
-- pip (or `pip install -r requirements.txt`)
+1. **Notebook** — prototype fast, explore data, try models, validate results
+2. **Module** — graduate the working logic into a clean function/class under `ml/`
+3. **API** — expose it through a FastAPI endpoint
+4. **Frontend** — surface it on the dashboard
 
-### Installation
+---
+
+## Roadmap
+
+Built in 4 phases over ~24 days (3–3.5 hrs/day):
+
+- **Phase 1 — Foundation + Customer Intelligence:** Data cleaning, EDA, RFM segmentation, backend skeleton
+- **Phase 2 — Predictive Intelligence:** Churn prediction, CLV, product recommendations
+- **Phase 3 — Forecasting & Anomaly Detection:** Sales forecasting, demand prediction, anomaly detection
+- **Phase 4 — AI Analyst + Dashboard:** Natural-language business Q&A, full dashboard, deployment
+
+### Not in scope for this build (future work)
+- RAG with a vector database (using template-based Q&A + LLM phrasing instead)
+- Multi-model forecast comparison (Prophet only for now)
+- Deep learning models (PyTorch)
+- Full BG/NBD CLV model (using formula-based CLV instead)
+- Hybrid recommendation engine (popularity + collaborative filtering only)
+
+---
+
+## Getting Started
 
 ```bash
-git clone https://github.com/<your-username>/ecommerce-intelligent-system.git
-cd ecommerce-intelligent-system
+# Clone the repo
+git clone https://github.com/<your-username>/ai-ecommerce-intelligence-platform.git
+cd ai-ecommerce-intelligence-platform
+
+# Set up a virtual environment
+python3 -m venv venv
+source venv/bin/activate      # Windows: venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
-```
 
-### Running the Notebooks
-
-```bash
-jupyter lab         # or: jupyter notebook
+# Launch Jupyter for the notebook workflow
+jupyter notebook
 ```
 
 ---
 
-## Notebooks
+## Author
 
-| # | Notebook | Purpose |
-|---|----------|---------|
-| 01 | `01_data_exploration.ipynb` | Load dataset, inspect shape, dtypes, summary stats, head/tail previews |
-| 02 | `02_data_cleaning.ipynb` | Handle missing values, remove negatives/zero-prices, separate sales vs returns, compute `TotalPrice`, save cleaned CSVs |
-| *03* | *(upcoming)* | RFM customer segmentation, cohort analysis |
-| *04* | *(upcoming)* | Predictive modeling — demand forecasting, churn, return-risk |
-| *05* | *(upcoming)* | Streamlit dashboard for business stakeholders |
-
----
-
-## Tech Stack
-
-| Library          | Role                                   |
-|------------------|----------------------------------------|
-| pandas           | Data manipulation & preprocessing      |
-| numpy            | Numerical operations                   |
-| scikit-learn     | ML models & preprocessing              |
-| matplotlib       | Static visualizations                  |
-| seaborn          | Statistical plots                      |
-| statsmodels      | Time-series & statistical modeling     |
-| plotly           | Interactive charts & dashboards        |
-| jupyter / jupyterlab | Interactive notebook environment  |
-| scipy            | Scientific computing utilities         |
-
----
-
-## Planned Analyses
-
-1. **Exploratory Data Analysis** — sales trends, top products, country breakdowns
-2. **RFM Segmentation** — Recency, Frequency, Monetary customer groups
-3. **Cohort Analysis** — retention curves, customer lifecycle
-4. **Predictive Modeling** — demand forecasting, return likelihood
-5. **Interactive Dashboard** — Streamlit app for non-technical stakeholders
-
----
-
-## License
-
-MIT — see [LICENSE](LICENSE) for details.
+**Raheel Nadeem**
+[Website](https://raheelnadeem.online) · [LinkedIn](https://linkedin.com/in/raheel-nadeem) · [GitHub](https://github.com/raheel-9deem)
