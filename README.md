@@ -20,9 +20,45 @@ An end-to-end analytics platform that turns raw e-commerce transaction data into
 
 ---
 
-## Dataset
+## Datasets
 
-Built on the **[Online Retail II](https://www.kaggle.com/datasets/mashlyn/online-retail-ii-uci)** dataset (UCI Machine Learning Repository) — ~1M transactions, ~5,900 customers, ~5,300 products, spanning Dec 2009–Dec 2011, across 43 countries.
+Raw data lives in `data/raw/` and holds two source datasets:
+
+### 1. Online Retail II — *primary (in use)*
+The **[Online Retail II](https://www.kaggle.com/datasets/mashlyn/online-retail-ii-uci)** dataset (UCI Machine Learning Repository) — ~1M transactions, ~5,900 customers, ~5,300 products, spanning Dec 2009–Dec 2011, across 43 countries. This is the dataset the current notebooks (01–04) clean, explore, and segment.
+
+- `online_retail_II.csv`
+
+### 2. Olist Brazilian E-Commerce — *available (not yet used)*
+The **[Olist Brazilian E-Commerce Public Dataset](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)** — ~100k orders (2016–2018) with customers, items, payments, reviews, sellers, geolocation, and product metadata across relational tables:
+
+- `olist_customers_dataset.csv`
+- `olist_geolocation_dataset.csv`
+- `olist_order_items_dataset.csv`
+- `olist_order_payments_dataset.csv`
+- `olist_order_reviews_dataset.csv`
+- `olist_orders_dataset.csv`
+- `olist_products_dataset.csv`
+- `olist_sellers_dataset.csv`
+- `product_category_name_translation.csv`
+
+---
+
+## Current Progress
+
+The project is being built in phases. Status as of the latest commit:
+
+| Stage | Status |
+|---|---|
+| Data loading & inspection (`01`) | ✅ Done |
+| Data cleaning — split sales vs. returns, handle nulls/duplicates (`02`) | ✅ Done |
+| Exploratory data analysis — top products, customers, monthly trend, country revenue (`03`) | ✅ Done |
+| RFM feature engineering + K-Means segmentation into 4 segments (`04`) | ✅ Done |
+| Churn prediction, CLV, recommendations | ⏳ Next |
+| Forecasting, anomaly detection | ⏳ Planned |
+| Backend API, AI analyst, dashboard | ⏳ Planned |
+
+**Segments produced so far** (from `data/processed/rfm_segments.csv`): `VIP`, `Regular`, `At Risk`, `Key Accounts (Wholesale/Bulk)`.
 
 ---
 
@@ -41,19 +77,24 @@ Built on the **[Online Retail II](https://www.kaggle.com/datasets/mashlyn/online
 ```
 ai-ecommerce/
 │
-├── notebooks/                    # Exploratory & prototyping work
-│   ├── 01_data_exploration.ipynb
-│   ├── 02_data_cleaning.ipynb
-│   ├── 03_eda.ipynb
-│   ├── 04_rfm_segmentation.ipynb
-│   ├── 05_churn_prediction.ipynb
-│   ├── 06_recommendation.ipynb
-│   ├── 07_forecasting.ipynb
-│   └── 08_anomaly_detection.ipynb
+├── notebooks/                          # Exploratory & prototyping work
+│   ├── 01_data_exploration.ipynb       # ✅ done
+│   ├── 02_data_cleaning.ipynb          # ✅ done
+│   ├── 03_eda_ipynb.ipynb              # ✅ done
+│   ├── 04_RFM_K_Mean_Clustring.ipynb  # ✅ done — RFM + K-Means segmentation
+│   ├── 05_churn_prediction.ipynb       # ⏳ planned
+│   ├── 06_recommendation.ipynb         # ⏳ planned
+│   ├── 07_forecasting.ipynb            # ⏳ planned
+│   └── 08_anomaly_detection.ipynb      # ⏳ planned
 │
 ├── data/
-│   ├── raw/                      # Original dataset
-│   └── processed/                # Cleaned CSVs
+│   ├── raw/                            # Original datasets (unmodified)
+│   │   ├── online_retail_II.csv            # UCI Online Retail II — used by notebooks 01–04
+│   │   └── olist_*.csv (+ translation)     # Olist Brazilian E-Commerce set (9 files, see below)
+│   └── processed/                      # Cleaned CSVs
+│       ├── online_retail_sales_cleaned.csv
+│       ├── online_retail_returns.csv
+│       └── rfm_segments.csv            # RFM features + cluster segment per customer
 │
 ├── backend/
 │   ├── api/                      # FastAPI route files
