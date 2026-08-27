@@ -29,18 +29,11 @@ The **[Online Retail II](https://www.kaggle.com/datasets/mashlyn/online-retail-i
 
 - `online_retail_II.csv`
 
-### 2. Olist Brazilian E-Commerce — *available (not yet used)*
-The **[Olist Brazilian E-Commerce Public Dataset](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)** — ~100k orders (2016–2018) with customers, items, payments, reviews, sellers, geolocation, and product metadata across relational tables:
+### 2. Olist Brazilian E-Commerce — *ready for use*
+The **[Olist Brazilian E-Commerce Public Dataset](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)** — ~100k orders (2016–2018) with customers, items, payments, reviews, sellers, geolocation, and product metadata across relational tables. This dataset has been cleaned, merged, and explored in notebooks `02` and `03` – EDA-2.
 
-- `olist_customers_dataset.csv`
-- `olist_geolocation_dataset.csv`
-- `olist_order_items_dataset.csv`
-- `olist_order_payments_dataset.csv`
-- `olist_order_reviews_dataset.csv`
-- `olist_orders_dataset.csv`
-- `olist_products_dataset.csv`
-- `olist_sellers_dataset.csv`
-- `product_category_name_translation.csv`
+- Raw: `olist_*.csv` (+ `product_category_name_translation.csv`)
+- Cleaned: `data/processed/olist_cleaned.csv` (110,197 delivered rows, 19 columns)
 
 ---
 
@@ -50,13 +43,14 @@ The project is being built in phases. Status as of the latest commit:
 
 | Stage | Status |
 |---|---|
-| Data loading & inspection (`01`) | ✅ Done |
-| Data cleaning — split sales vs. returns, handle nulls/duplicates (`02`) | ✅ Done |
-| Exploratory data analysis — top products, customers, monthly trend, country revenue (`03`) | ✅ Done |
-| RFM feature engineering + K-Means segmentation into 4 segments (`04`) | ✅ Done |
-| Churn prediction, CLV, recommendations | ⏳ Next |
-| Forecasting, anomaly detection | ⏳ Planned |
-| Backend API, AI analyst, dashboard | ⏳ Planned |
+| **Data loading & inspection** (`01`) | ✅ Done |
+| **Data cleaning** — split sales vs. returns, handle nulls/duplicates, merge Olist dataset (`02`) | ✅ Done |
+| **EDA — Online Retail II** — top products, customers, monthly trend, country revenue (`03` – eda-1) | ✅ Done |
+| **EDA — Olist Brazilian E-Commerce** — top products, customers, monthly trend, state revenue (`03` – EDA-2) | ✅ Done |
+| **RFM feature engineering + K-Means segmentation into 4 segments** (`04`) | ✅ Done |
+| **Churn prediction, CLV, recommendations** | ⏳ Next |
+| **Forecasting, anomaly detection** | ⏳ Planned |
+| **Backend API, AI analyst, dashboard** | ⏳ Planned |
 
 **Segments produced so far** (from `data/processed/rfm_segments.csv`): `VIP`, `Regular`, `At Risk`, `Key Accounts (Wholesale/Bulk)`.
 
@@ -80,7 +74,8 @@ ai-ecommerce/
 ├── notebooks/                          # Exploratory & prototyping work
 │   ├── 01_data_exploration.ipynb       # ✅ done
 │   ├── 02_data_cleaning.ipynb          # ✅ done
-│   ├── 03_eda_ipynb.ipynb              # ✅ done
+│   ├── 03_eda-1.ipynb                  # ✅ done — EDA on Online Retail II
+│   ├── 03_EDA-2.ipynb                  # ✅ done — EDA on Olist Brazilian E-Commerce
 │   ├── 04_RFM_K_Mean_Clustring.ipynb  # ✅ done — RFM + K-Means segmentation
 │   ├── 05_churn_prediction.ipynb       # ⏳ planned
 │   ├── 06_recommendation.ipynb         # ⏳ planned
@@ -90,11 +85,12 @@ ai-ecommerce/
 ├── data/
 │   ├── raw/                            # Original datasets (unmodified)
 │   │   ├── online_retail_II.csv            # UCI Online Retail II — used by notebooks 01–04
-│   │   └── olist_*.csv (+ translation)     # Olist Brazilian E-Commerce set (9 files, see below)
+│   │   └── olist_*.csv (+ translation)     # Olist Brazilian E-Commerce set (9 files, used by notebooks 02, 03-EDA2)
 │   └── processed/                      # Cleaned CSVs
 │       ├── online_retail_sales_cleaned.csv
 │       ├── online_retail_returns.csv
-│       └── rfm_segments.csv            # RFM features + cluster segment per customer
+│       ├── rfm_segments.csv            # RFM features + cluster segment per customer
+│       └── olist_cleaned.csv           # Merged & cleaned Olist data (delivered orders, 110k rows)
 │
 ├── backend/
 │   ├── api/                      # FastAPI route files
