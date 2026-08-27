@@ -112,11 +112,11 @@ ai-ecommerce/
 │
 ├── frontend/                     # React + Tailwind dashboard
 │
-├── database/                     # Migrations / seed scripts
+├── database/                     # *Planned* — Migrations / seed scripts
 │
-├── tests/
+├── tests/                        # *Planned*
 │
-├── docker/                       # Optional containerization
+├── docker/                       # *Planned* — Optional containerization
 │
 └── requirements.txt
 ```
