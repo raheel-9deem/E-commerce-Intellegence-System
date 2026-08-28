@@ -47,12 +47,13 @@ The project is being built in phases. Status as of the latest commit:
 | **Data cleaning** — split sales vs. returns, handle nulls/duplicates, merge Olist dataset (`02`) | ✅ Done |
 | **EDA — Online Retail II** — top products, customers, monthly trend, country revenue (`03` – eda-1) | ✅ Done |
 | **EDA — Olist Brazilian E-Commerce** — top products, customers, monthly trend, state revenue (`03` – EDA-2) | ✅ Done |
-| **RFM feature engineering + K-Means segmentation into 4 segments** (`04`) | ✅ Done |
+| **RFM + K-Means (Online Retail II)** — 4 segments: VIP, Regular, At Risk, Key Accounts (`04`) | ✅ Done |
+| **RFM + K-Means (Olist)** — 4 segments for the Olist customer base (`04` – RFM_2) | ✅ Done |
 | **Churn prediction, CLV, recommendations** | ⏳ Next |
 | **Forecasting, anomaly detection** | ⏳ Planned |
 | **Backend API, AI analyst, dashboard** | ⏳ Planned |
 
-**Segments produced so far** (from `data/processed/rfm_segments.csv`): `VIP`, `Regular`, `At Risk`, `Key Accounts (Wholesale/Bulk)`.
+**Segments produced so far** — Online Retail II (`data/processed/rfm_segments.csv`): `VIP`, `Regular`, `At Risk`, `Key Accounts (Wholesale/Bulk)`.  Olist (`data/processed/olist_rfm_segments.csv`): `Recent One-Time Buyers`, `Lapsed / At Risk`, `High-Value One-Timers`, `Repeat Customers`.
 
 ---
 
@@ -74,9 +75,10 @@ ai-ecommerce/
 ├── notebooks/                          # Exploratory & prototyping work
 │   ├── 01_data_exploration.ipynb       # ✅ done
 │   ├── 02_data_cleaning.ipynb          # ✅ done
-│   ├── 03_eda-1.ipynb                  # ✅ done — EDA on Online Retail II
 │   ├── 03_EDA-2.ipynb                  # ✅ done — EDA on Olist Brazilian E-Commerce
-│   ├── 04_RFM_K_Mean_Clustring.ipynb  # ✅ done — RFM + K-Means segmentation
+│   ├── 03_eda-1.ipynb                  # ✅ done — EDA on Online Retail II
+│   ├── 04_RFM_K_mean_clustring_2.ipynb # ✅ done — RFM + K-Means on Olist dataset
+│   ├── 04_RFM_K_Mean_Clustring.ipynb   # ✅ done — RFM + K-Means on Online Retail II
 │   ├── 05_churn_prediction.ipynb       # ⏳ planned
 │   ├── 06_recommendation.ipynb         # ⏳ planned
 │   ├── 07_forecasting.ipynb            # ⏳ planned
@@ -85,12 +87,13 @@ ai-ecommerce/
 ├── data/
 │   ├── raw/                            # Original datasets (unmodified)
 │   │   ├── online_retail_II.csv            # UCI Online Retail II — used by notebooks 01–04
-│   │   └── olist_*.csv (+ translation)     # Olist Brazilian E-Commerce set (9 files, used by notebooks 02, 03-EDA2)
+│   │   └── olist_*.csv (+ translation)     # Olist Brazilian E-Commerce set (9 files, used by notebooks 02, 03-EDA2, 04-RFM2)
 │   └── processed/                      # Cleaned CSVs
 │       ├── online_retail_sales_cleaned.csv
 │       ├── online_retail_returns.csv
-│       ├── rfm_segments.csv            # RFM features + cluster segment per customer
-│       └── olist_cleaned.csv           # Merged & cleaned Olist data (delivered orders, 110k rows)
+│       ├── rfm_segments.csv            # RFM features + cluster segment per customer (Online Retail II)
+│       ├── olist_cleaned.csv           # Merged & cleaned Olist data (delivered orders, 110k rows)
+│       └── olist_rfm_segments.csv      # RFM features + cluster segment per Olist customer
 │
 ├── backend/
 │   ├── api/                      # FastAPI route files
