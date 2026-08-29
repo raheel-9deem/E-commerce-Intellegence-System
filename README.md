@@ -8,9 +8,9 @@ An end-to-end analytics platform that turns raw e-commerce transaction data into
 
 | Module | What it does |
 |---|---|
-| **Customer Segmentation** | RFM analysis + K-Means clustering to group customers into VIP / Regular / Occasional / At Risk |
-| **Churn Prediction** | Logistic Regression / Random Forest model to flag customers likely to stop purchasing |
-| **Customer Lifetime Value (CLV)** | Formula-based estimate of future customer value |
+| **Customer Segmentation** | RFM analysis + K-Means clustering to group customers into VIP / Regular / Occasional / At Risk | Online Retail II ✅ &nbsp;Olist ✅ done |
+| **Churn Prediction** | Logistic Regression / Random Forest model to flag customers likely to stop purchasing | In progress — notebook + model trained |
+| **Customer Lifetime Value (CLV)** | Formula-based estimate of future customer value | ⏳ planned |
 | **Product Recommendations** | Popularity-based + item-based collaborative filtering |
 | **Sales Forecasting** | Prophet time-series model to predict future revenue |
 | **Demand Prediction** | Per-product forecast for top-selling items |
@@ -49,7 +49,7 @@ The project is being built in phases. Status as of the latest commit:
 | **EDA — Olist Brazilian E-Commerce** — top products, customers, monthly trend, state revenue (`03` – EDA-2) | ✅ Done |
 | **RFM + K-Means (Online Retail II)** — 4 segments: VIP, Regular, At Risk, Key Accounts (`04`) | ✅ Done |
 | **RFM + K-Means (Olist)** — 4 segments for the Olist customer base (`04` – RFM_2) | ✅ Done |
-| **Churn prediction, CLV, recommendations** | ⏳ Next |
+| **Churn prediction, CLV, recommendations** | 🔄 In progress (churn model trained) |
 | **Forecasting, anomaly detection** | ⏳ Planned |
 | **Backend API, AI analyst, dashboard** | ⏳ Planned |
 
@@ -79,7 +79,7 @@ ai-ecommerce/
 │   ├── 03_eda-1.ipynb                  # ✅ done — EDA on Online Retail II
 │   ├── 04_RFM_K_mean_clustring_2.ipynb # ✅ done — RFM + K-Means on Olist dataset
 │   ├── 04_RFM_K_Mean_Clustring.ipynb   # ✅ done — RFM + K-Means on Online Retail II
-│   ├── 05_churn_prediction.ipynb       # ⏳ planned
+│   ├── 05_churn_prediction.ipynb       # ✅ done — Churn prediction (Logistic Regression, Random Forest, etc.)
 │   ├── 06_recommendation.ipynb         # ⏳ planned
 │   ├── 07_forecasting.ipynb            # ⏳ planned
 │   └── 08_anomaly_detection.ipynb      # ⏳ planned
@@ -103,8 +103,9 @@ ai-ecommerce/
 │   └── core/                     # Config, DB connection
 │
 ├── ml/                           # Production ML modules (graduated from notebooks)
-│   ├── customer_segmentation/
 │   ├── churn_prediction/
+│   │   └── churn_model.pkl       # Trained RandomForest churn model
+│   ├── customer_segmentation/
 │   ├── recommendation/
 │   ├── forecasting/
 │   └── anomaly_detection/
