@@ -16,8 +16,8 @@ An end-to-end analytics platform that turns raw e-commerce transaction data into
 | `06_clv.ipynb` | ✅ Done | Churn-rate-based estimated lifespan → formula-based CLV per customer |
 | `07_recommendation.ipynb` | ✅ Done | Popularity-based + item-based collaborative filtering (cosine similarity) |
 | `08_forecasting.ipynb` | ✅ Done | Prophet model — daily sales forecast, trend/weekly/yearly seasonality analyzed |
-| `09_anomaly_detection.ipynb` | 🟡 In progress | Isolation Forest on invoice-level transaction summaries |
-| Backend (FastAPI) | ⬜ Not started | API layer over the ML modules |
+| `09_anomaly_detection.ipynb` | ✅ Done | Isolation Forest on invoice-level summaries — flagged large-volume/high-value wholesale orders |
+| Backend (FastAPI) | ⬜ **Up next** | API layer over the ML modules |
 | Frontend (React) | ⬜ Not started | Dashboard |
 
 ---
@@ -140,12 +140,12 @@ Built in 4 phases (3–3.5 hrs/day):
 
 ```bash
 # Clone the repo
-git clone https://github.com/<your-username>/ai-ecommerce-intelligence-platform.git
-cd ai-ecommerce-intelligence-platform
+git clone https://github.com/raheel-9deem/E-commerce-intelligent-system.git
+cd E-commerce-intelligence-System
 
 # Set up a virtual environment
 python3 -m venv venv
-source venv/Scripts/activate 
+source venv/bin/activate      # Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
