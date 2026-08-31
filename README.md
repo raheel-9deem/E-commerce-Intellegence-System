@@ -15,8 +15,8 @@ An end-to-end analytics platform that turns raw e-commerce transaction data into
 | `05_churn_prediction.ipynb` | ✅ Done | Feature engineering (AvgOrderValue, UniqueProducts, TenureDays), compared 6 classifiers, Random Forest selected (82% accuracy) |
 | `06_clv.ipynb` | ✅ Done | Churn-rate-based estimated lifespan → formula-based CLV per customer |
 | `07_recommendation.ipynb` | ✅ Done | Popularity-based + item-based collaborative filtering (cosine similarity) |
-| `08_forecasting.ipynb` | ⬜ Not started | Prophet-based sales forecasting |
-| `09_anomaly_detection.ipynb` | ⬜ Not started | Isolation Forest on transactions |
+| `08_forecasting.ipynb` | ✅ Done | Prophet model — daily sales forecast, trend/weekly/yearly seasonality analyzed |
+| `09_anomaly_detection.ipynb` | 🟡 In progress | Isolation Forest on invoice-level transaction summaries |
 | Backend (FastAPI) | ⬜ Not started | API layer over the ML modules |
 | Frontend (React) | ⬜ Not started | Dashboard |
 
@@ -140,8 +140,8 @@ Built in 4 phases (3–3.5 hrs/day):
 
 ```bash
 # Clone the repo
-git clone https://github.com/raheel-9deem/E-commerce-Intellegence-System.git
-cd E-commerce-Intellegence-System
+git clone https://github.com/<your-username>/ai-ecommerce-intelligence-platform.git
+cd ai-ecommerce-intelligence-platform
 
 # Set up a virtual environment
 python3 -m venv venv
