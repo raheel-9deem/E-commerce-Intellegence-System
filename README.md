@@ -140,12 +140,12 @@ Built in 4 phases (3–3.5 hrs/day):
 
 ```bash
 # Clone the repo
-git clone https://github.com/<your-username>/ai-ecommerce-intelligence-platform.git
-cd ai-ecommerce-intelligence-platform
+git clone https://github.com/raheel-9deem/E-commerce-Intellegence-System.git
+cd E-commerce-Intellegence-System
 
 # Set up a virtual environment
 python3 -m venv venv
-source venv/bin/activate      # Windows: venv\Scripts\activate
+source venv/Scripts/activate 
 
 # Install dependencies
 pip install -r requirements.txt
