@@ -17,8 +17,19 @@ An end-to-end analytics platform that turns raw e-commerce transaction data into
 | `07_recommendation.ipynb` | ✅ Done | Popularity-based + item-based collaborative filtering (cosine similarity) |
 | `08_forecasting.ipynb` | ✅ Done | Prophet model — daily sales forecast, trend/weekly/yearly seasonality analyzed |
 | `09_anomaly_detection.ipynb` | ✅ Done | Isolation Forest on invoice-level summaries — flagged large-volume/high-value wholesale orders |
-| Backend (FastAPI) | ⬜ **Up next** | API layer over the ML modules |
+| Backend (FastAPI) | 🟡 In progress | SQLite + SQLAlchemy `Customer` table (5,878 rows seeded); live endpoints for customer list/detail and churn prediction (see below) |
 | Frontend (React) | ⬜ Not started | Dashboard |
+
+### Backend — what's live so far
+
+- **Database:** SQLite (`ecommerce.db`), via SQLAlchemy ORM — chosen for zero-setup local development; the ORM layer makes switching to PostgreSQL later a connection-string change, not a rewrite
+- **`Customer` table:** `id`, `recency`, `frequency`, `monetary`, `segment`, `churned`, `clv`, `avg_order_value`, `unique_products`, `tenure_days` — seeded from the notebook outputs (`clv_results.csv` + engineered fields from the cleaned sales data)
+- **Endpoints:**
+  - `GET /` — health check
+  - `GET /customers` — list customers (Pydantic `CustomerSchema` response model)
+  - `GET /customers/{customer_id}` — single customer lookup
+  - `GET /customers/{customer_id}/churn-prediction` — loads the saved `churn_model.pkl` (Random Forest) and returns a live churn prediction for that customer
+- Interactive API docs auto-generated at `/docs`
 
 ---
 
@@ -48,8 +59,8 @@ Built on the **[Online Retail II](https://www.kaggle.com/datasets/mashlyn/online
 
 ## Tech Stack
 
-**Backend:** Python, FastAPI, Pydantic, SQLAlchemy, PostgreSQL
-**Data / ML:** Pandas, NumPy, Scikit-learn, Prophet, Isolation Forest
+**Backend:** Python, FastAPI, Pydantic, SQLAlchemy, SQLite (dev) → PostgreSQL-ready
+**Data / ML:** Pandas, NumPy, Scikit-learn, Prophet, Isolation Forest, joblib
 **AI:** LLM API (Claude) for natural-language business Q&A
 **Frontend:** React, Tailwind CSS, Recharts / Plotly
 **Tooling:** Jupyter Notebooks, Git/GitHub, Docker (optional)
@@ -77,15 +88,18 @@ ai-ecommerce/
 │   └── processed/                # Cleaned CSVs
 │
 ├── backend/
-│   ├── api/                      # FastAPI route files
-│   ├── models/                   # SQLAlchemy DB models
-│   ├── schemas/                  # Pydantic request/response schemas
+│   ├── main.py                   # FastAPI app + routes
+│   ├── create_tables.py          # Creates all tables from models
+│   ├── seed_data.py              # Loads processed CSVs into the database
+│   ├── api/                      # FastAPI route files (future: split out of main.py)
+│   ├── models/                   # SQLAlchemy DB models (customer.py, ...)
+│   ├── schemas/                  # Pydantic request/response schemas (customer.py, ...)
 │   ├── services/                 # Business logic
-│   └── core/                     # Config, DB connection
+│   └── core/                     # Config, DB connection (database.py)
 │
 ├── ml/                           # Production ML modules (graduated from notebooks)
 │   ├── customer_segmentation/
-│   ├── churn_prediction/
+│   ├── churn_prediction/         # churn_model.pkl (Random Forest, 82% accuracy)
 │   ├── recommendation/
 │   ├── forecasting/
 │   └── anomaly_detection/
@@ -133,6 +147,7 @@ Built in 4 phases (3–3.5 hrs/day):
 - Deep learning models (PyTorch)
 - Full BG/NBD CLV model (using formula-based CLV instead)
 - Hybrid recommendation engine (popularity + collaborative filtering only)
+- PostgreSQL in production (SQLite used for local development; swap is a one-line connection-string change thanks to SQLAlchemy)
 
 ---
 
@@ -152,6 +167,17 @@ pip install -r requirements.txt
 
 # Launch Jupyter for the notebook workflow
 jupyter notebook
+
+# --- Backend ---
+# Create the database tables
+python -m backend.create_tables
+
+# Seed the database from the processed CSVs
+python -m backend.seed_data
+
+# Run the API server (auto-reloads on code changes)
+uvicorn backend.main:app --reload
+# Then open http://127.0.0.1:8000/docs for interactive API docs
 ```
 
 ---
