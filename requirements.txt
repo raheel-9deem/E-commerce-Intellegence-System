@@ -1,28 +1,30 @@
 # Data handling
-pandas==2.2.3
-numpy==1.26.4
+# Note: pandas 2.3.3+ is the first version with official Python 3.14 wheels — pinning
+# to 2.2.x forces pip to compile from source, which fails without build tools.
+pandas>=2.3.3
+numpy>=2.1.0
 
 # Visualization
-matplotlib==3.9.0
-seaborn==0.13.2
+matplotlib>=3.9.2
+seaborn>=0.13.2
 
 # Machine Learning
-scikit-learn==1.5.0
-joblib==1.4.2
+scikit-learn>=1.6.0
+joblib>=1.4.2
 
 # Forecasting
-prophet==1.1.5
+prophet>=1.1.6
 
 # Notebook environment
-jupyter==1.0.0
+jupyter>=1.0.0
 
 # Backend
-fastapi==0.111.0
-uvicorn==0.30.1
-pydantic==2.7.4
-sqlalchemy==2.0.31
-python-dotenv==1.0.1
+fastapi>=0.111.0
+uvicorn>=0.30.1
+pydantic>=2.7.4
+sqlalchemy>=2.0.31
+python-dotenv>=1.0.1
 
 # --- Not yet used, needed for future phases ---
 # PostgreSQL (production database — SQLite used for local dev)
-# psycopg2-binary==2.9.9
+# psycopg2-binary>=2.9.9
