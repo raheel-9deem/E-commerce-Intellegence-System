@@ -11,3 +11,6 @@ class Customer(Base):
     segment = Column(String)
     churned = Column(Integer)
     clv = Column(Float)
+    avg_order_value = Column(Float)
+    unique_products = Column(Integer)
+    tenure_days = Column(Integer)
