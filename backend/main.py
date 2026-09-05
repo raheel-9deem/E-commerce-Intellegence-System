@@ -19,6 +19,9 @@ product_similarity_df = pd.read_csv('data/processed/product_similarity_matrix.cs
 forecast_df = pd.read_csv('data/processed/sales_forecast.csv')
 forecast_df['ds'] = pd.to_datetime(forecast_df['ds'])
 
+# Anomaly Detection Processed Data
+anomaly_df = pd.read_csv('data/processed/anomaly_results.csv')
+
 
 # Main Route
 @app.get("/")
@@ -98,7 +101,8 @@ def get_similar_products(product_name: str, top_n: int = 10):
 # Sales Forecast
 @app.get("/sales/forecast")
 def get_forecast(days: int = 30):
-    upcoming = forecast_df[forecast_df['ds'] > pd.Timestamp.today()].head(days)
+    upcoming = forecast_df.tail(days)
     result = upcoming[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].copy()
     result['ds'] = result['ds'].dt.strftime('%Y-%m-%d')
     return result.to_dict(orient='records')
+
