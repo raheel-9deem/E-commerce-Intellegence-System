@@ -139,7 +139,7 @@ This means the notebooks aren't just scratch work to throw away — they're the 
 | `07_recommendation.ipynb` | ✅ Done | Popularity-based + item-based collaborative filtering (cosine similarity) |
 | `08_forecasting.ipynb` | ✅ Done | Prophet model — daily sales forecast, trend/weekly/yearly seasonality analyzed |
 | `09_anomaly_detection.ipynb` | ✅ Done | Isolation Forest on invoice-level summaries — flagged large-volume/high-value wholesale-style orders |
-| Backend (FastAPI) | 🟡 In progress | See below |
+| Backend (FastAPI) | 🟡 In progress | All 5 core ML modules exposed via API — see below |
 | Frontend (React) | ⬜ Not started | |
 | AI Business Analyst | ⬜ Not started | |
 
@@ -150,8 +150,14 @@ This means the notebooks aren't just scratch work to throw away — they're the 
 - **Live endpoints:**
   - `GET /` — health check
   - `GET /customers` — list customers (returns a `List[CustomerSchema]`)
+  - `GET /customers/top-clv` — top N customers by CLV (`?limit=`, default 10)
+  - `GET /customers/segment/{segment_name}` — all customers in a given segment (e.g. `VIP`)
   - `GET /customers/{customer_id}` — look up a single customer
   - `GET /customers/{customer_id}/churn-prediction` — loads `ml/churn_prediction/churn_model.pkl` and returns a live churn prediction for that customer
+  - `GET /products/{product_name}/similar` — item-based collaborative filtering results from `product_similarity_matrix.csv` (`?top_n=`, default 5)
+  - `GET /sales/forecast` — next-N-days Prophet forecast (`yhat`/`yhat_lower`/`yhat_upper`) from `sales_forecast.csv` (`?days=`, default 30)
+  - `GET /transactions/anomalies` — top flagged anomalous invoices from `anomaly_results.csv`, sorted by amount (`?limit=`, default 20)
+- **Important — route ordering:** FastAPI matches routes top-to-bottom, and a path parameter like `{customer_id}` matches *any* string. Fixed-path routes (e.g. `/customers/top-clv`) must be declared **above** wildcard routes (e.g. `/customers/{customer_id}`) in `main.py`, or the wildcard route swallows the request first.
 - Interactive, auto-generated API docs are available at `/docs` once the server is running.
 
 ---
@@ -240,8 +246,11 @@ If you change the `Customer` model's columns, the database schema does **not** u
 | GET | `/customers` | List customers (first 10, per `CustomerSchema`) |
 | GET | `/customers/{customer_id}` | Get a single customer by ID |
 | GET | `/customers/{customer_id}/churn-prediction` | Predict churn (`true`/`false`) for a customer using the saved Random Forest model |
+| GET | `/products/{product_name}/similar` | Top-N similar products (item-based collaborative filtering) |
+| GET | `/sales/forecast` | Next N days of forecasted sales (Prophet output) |
+| GET | `/transactions/anomalies` | Top flagged anomalous invoices |
 
-More endpoints (segment filtering, recommendations, forecast, anomalies) are planned as the backend phase continues — see [Roadmap](#roadmap).
+All five core ML modules (Segmentation/CLV, Churn, Recommendations, Forecasting, Anomaly Detection) are now exposed via the API. Remaining planned work: a demand-prediction endpoint (per-product forecast), the AI Business Analyst, and the frontend dashboard — see [Roadmap](#roadmap).
 
 ---
 
