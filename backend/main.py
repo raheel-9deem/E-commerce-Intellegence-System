@@ -106,3 +106,9 @@ def get_forecast(days: int = 30):
     result['ds'] = result['ds'].dt.strftime('%Y-%m-%d')
     return result.to_dict(orient='records')
 
+# Anomaly Detection by ID
+@app.get("/transactions/anomalies")
+def get_anomalies(limit: int = 20):
+    flagged = anomaly_df[anomaly_df['Anomaly'] == -1]
+    top_flagged = flagged.sort_values('TotalAmount', ascending=False).head(limit)
+    return top_flagged.to_dict(orient='records')
