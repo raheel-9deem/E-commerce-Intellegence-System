@@ -1,20 +1,31 @@
 import joblib
 import pandas as pd
+from datetime import date
 from typing import List
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from backend.core.database import SessionLocal
 from backend.models.customer import Customer
 from backend.schemas.customers import CustomerSchema
 
 app = FastAPI()
 
+# Churn Model
 churn_model = joblib.load("ml/churn_prediction/churn_model.pkl")
+
+# Similar Products Processed Data
 product_similarity_df = pd.read_csv('data/processed/product_similarity_matrix.csv', index_col=0)
 
+# Sales Forecast Processed Data
+forecast_df = pd.read_csv('data/processed/sales_forecast.csv')
+forecast_df['ds'] = pd.to_datetime(forecast_df['ds'])
+
+
+# Main Route
 @app.get("/")
 def read_root():
     return {"message": "AI E-Commerce Intelligence Platform API is running"}
 
+# Customers
 @app.get("/customers", response_model=List[CustomerSchema])
 def get_all_customers():
     session = SessionLocal()
@@ -22,6 +33,7 @@ def get_all_customers():
     session.close()
     return customers
 
+# Customers Top CLV
 @app.get("/customers/top-clv", response_model=List[CustomerSchema])
 def get_top_clv_customers(limit: int = 10):
     session = SessionLocal()
@@ -29,6 +41,7 @@ def get_top_clv_customers(limit: int = 10):
     session.close()
     return customers
 
+# Customers by Segment
 @app.get("/customers/segment/{segment_name}", response_model=List[CustomerSchema])
 def get_customers_by_segment(segment_name: str):
     session = SessionLocal()
@@ -36,6 +49,7 @@ def get_customers_by_segment(segment_name: str):
     session.close()
     return customers
 
+# Customers by ID
 @app.get("/customers/{customer_id}", response_model=CustomerSchema)
 def get_customer(customer_id: str):
     session = SessionLocal()
@@ -45,6 +59,8 @@ def get_customer(customer_id: str):
         raise HTTPException(status_code=404, detail="Customer not found")
     return customer
 
+
+# Customers by ID Churn Prediction
 @app.get("/customers/{customer_id}/churn-prediction")
 def predict_churn(customer_id: str):
     session = SessionLocal()
@@ -66,6 +82,8 @@ def predict_churn(customer_id: str):
         "will_churn": bool(prediction)
     }
 
+
+# Products by ID Similar Products
 @app.get("/products/{product_name}/similar")
 def get_similar_products(product_name: str, top_n: int = 10):
     if product_name not in product_similarity_df.columns:
@@ -76,3 +94,11 @@ def get_similar_products(product_name: str, top_n: int = 10):
     top_similar = similar_scores.head(top_n)
 
     return top_similar.to_dict()
+
+# Sales Forecast
+@app.get("/sales/forecast")
+def get_forecast(days: int = 30):
+    upcoming = forecast_df[forecast_df['ds'] > pd.Timestamp.today()].head(days)
+    result = upcoming[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].copy()
+    result['ds'] = result['ds'].dt.strftime('%Y-%m-%d')
+    return result.to_dict(orient='records')
