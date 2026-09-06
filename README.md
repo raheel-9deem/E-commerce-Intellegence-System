@@ -80,13 +80,13 @@ ai-ecommerce/
 │   └── processed/                # Cleaned/derived CSVs produced by the notebooks
 │
 ├── backend/
-│   ├── main.py                   # FastAPI app + route definitions
+│   ├── main.py                   # FastAPI app setup, CORS, includes all routers
 │   ├── create_tables.py          # Creates all tables from the SQLAlchemy models
 │   ├── seed_data.py              # Loads the processed CSVs into the database
-│   ├── api/                      # Route files (routes currently live in main.py; will be split out here)
+│   ├── api/                      # One APIRouter per module (customers, churn, recommendations, sales, anomalies, dashboard)
 │   ├── models/                   # SQLAlchemy DB models (customer.py, ...)
 │   ├── schemas/                  # Pydantic request/response schemas (customer.py, ...)
-│   ├── services/                 # Business logic layer
+│   ├── services/                 # Business logic layer (reserved; logic currently lives in the api/ routers)
 │   └── core/                     # Config and DB connection (database.py)
 │
 ├── ml/                           # Production ML modules — the "graduated" version of notebook logic
@@ -139,26 +139,41 @@ This means the notebooks aren't just scratch work to throw away — they're the 
 | `07_recommendation.ipynb` | ✅ Done | Popularity-based + item-based collaborative filtering (cosine similarity) |
 | `08_forecasting.ipynb` | ✅ Done | Prophet model — daily sales forecast, trend/weekly/yearly seasonality analyzed |
 | `09_anomaly_detection.ipynb` | ✅ Done | Isolation Forest on invoice-level summaries — flagged large-volume/high-value wholesale-style orders |
-| Backend (FastAPI) | 🟡 In progress | All 5 core ML modules exposed via API — see below |
+| Backend (FastAPI) | ✅ Done | All 7 ML/analytics modules exposed via API, CORS-enabled, routes split into per-module files — see below |
 | Frontend (React) | ⬜ Not started | |
 | AI Business Analyst | ⬜ Not started | |
 
-### Backend — what's live right now
+### Backend — complete
 
 - **Database:** SQLite (`ecommerce.db`) via the SQLAlchemy ORM. SQLite was chosen for zero-setup local development; because SQLAlchemy abstracts the database layer, moving to PostgreSQL later is a one-line connection-string change in `backend/core/database.py`, not a rewrite.
 - **`Customer` table** (`backend/models/customer.py`): `id`, `recency`, `frequency`, `monetary`, `segment`, `churned`, `clv`, `avg_order_value`, `unique_products`, `tenure_days`. Seeded with all 5,878 customers from `data/processed/clv_results.csv`, with `unique_products` and `tenure_days` re-derived from the cleaned sales data at seed time (they weren't present in the CLV CSV — see `backend/seed_data.py` for how they're computed).
-- **Live endpoints:**
+- **`CustomerSchema`** (`backend/schemas/customer.py`): Pydantic response model, decoupling the API's public shape from the internal DB model.
+- **CORS enabled** for `http://localhost:3000` (the default React dev server address), so the planned frontend can call this API directly from the browser.
+- **Routes are organized by module** under `backend/api/`, each as its own `APIRouter` with a shared prefix, and wired together in `main.py` via `app.include_router(...)`:
+
+| File | Prefix | Endpoints |
+|---|---|---|
+| `api/customers.py` | `/customers` | list, top-CLV, segment filter, single lookup |
+| `api/churn.py` | `/customers` | `/{id}/churn-prediction` (loads `churn_model.pkl`) |
+| `api/recommendations.py` | `/products` | `/{name}/similar`, `/{name}/demand-forecast` |
+| `api/sales.py` | `/sales` | `/forecast` |
+| `api/anomalies.py` | `/transactions` | `/anomalies` |
+| `api/dashboard.py` | `/dashboard` | `/summary` (uses SQLAlchemy `func.count`/`sum`/`avg` + `group_by` for aggregate stats) |
+
+- **Full endpoint list:**
   - `GET /` — health check
   - `GET /customers` — list customers (returns a `List[CustomerSchema]`)
   - `GET /customers/top-clv` — top N customers by CLV (`?limit=`, default 10)
   - `GET /customers/segment/{segment_name}` — all customers in a given segment (e.g. `VIP`)
-  - `GET /customers/{customer_id}` — look up a single customer
-  - `GET /customers/{customer_id}/churn-prediction` — loads `ml/churn_prediction/churn_model.pkl` and returns a live churn prediction for that customer
-  - `GET /products/{product_name}/similar` — item-based collaborative filtering results from `product_similarity_matrix.csv` (`?top_n=`, default 5)
+  - `GET /customers/{customer_id}` — look up a single customer (404 if not found)
+  - `GET /customers/{customer_id}/churn-prediction` — live churn prediction (404 if customer not found)
+  - `GET /products/{product_name}/similar` — item-based collaborative filtering results (`?top_n=`, default 5; 404 if product not found)
+  - `GET /products/{product_name}/demand-forecast` — lightweight demand estimate from the last 90 days of sales, projected forward (`?days=`, default 30; 404 if product not found). Deliberately **not** a live Prophet run per request — training-time overhead makes that impractical for a request/response API, so this uses a simple historical-average projection instead.
   - `GET /sales/forecast` — next-N-days Prophet forecast (`yhat`/`yhat_lower`/`yhat_upper`) from `sales_forecast.csv` (`?days=`, default 30)
   - `GET /transactions/anomalies` — top flagged anomalous invoices from `anomaly_results.csv`, sorted by amount (`?limit=`, default 20)
-- **Important — route ordering:** FastAPI matches routes top-to-bottom, and a path parameter like `{customer_id}` matches *any* string. Fixed-path routes (e.g. `/customers/top-clv`) must be declared **above** wildcard routes (e.g. `/customers/{customer_id}`) in `main.py`, or the wildcard route swallows the request first.
-- Interactive, auto-generated API docs are available at `/docs` once the server is running.
+  - `GET /dashboard/summary` — aggregate stats in one call: total customers, total revenue, average CLV, churned count, and a segment-wise breakdown
+- **Important — route ordering:** FastAPI matches routes top-to-bottom, and a path parameter like `{customer_id}` matches *any* string. Fixed-path routes (e.g. `/customers/top-clv`) must be declared **above** wildcard routes (e.g. `/customers/{customer_id}`) within the same router, or the wildcard route swallows the request first.
+- Interactive, auto-generated API docs are available at `/docs` once the server is running — endpoints are grouped there by the `tags` set on each router.
 
 ---
 
@@ -244,13 +259,17 @@ If you change the `Customer` model's columns, the database schema does **not** u
 |---|---|---|
 | GET | `/` | Health check |
 | GET | `/customers` | List customers (first 10, per `CustomerSchema`) |
+| GET | `/customers/top-clv` | Top N customers by CLV (`?limit=`) |
+| GET | `/customers/segment/{segment_name}` | All customers in a given segment |
 | GET | `/customers/{customer_id}` | Get a single customer by ID |
 | GET | `/customers/{customer_id}/churn-prediction` | Predict churn (`true`/`false`) for a customer using the saved Random Forest model |
 | GET | `/products/{product_name}/similar` | Top-N similar products (item-based collaborative filtering) |
+| GET | `/products/{product_name}/demand-forecast` | Lightweight per-product demand estimate (`?days=`) |
 | GET | `/sales/forecast` | Next N days of forecasted sales (Prophet output) |
 | GET | `/transactions/anomalies` | Top flagged anomalous invoices |
+| GET | `/dashboard/summary` | Aggregate business stats in one call |
 
-All five core ML modules (Segmentation/CLV, Churn, Recommendations, Forecasting, Anomaly Detection) are now exposed via the API. Remaining planned work: a demand-prediction endpoint (per-product forecast), the AI Business Analyst, and the frontend dashboard — see [Roadmap](#roadmap).
+All ML/analytics modules from the notebooks (Segmentation/CLV, Churn, Recommendations, Demand Prediction, Forecasting, Anomaly Detection) are now exposed via the API, with a dashboard-summary endpoint on top. Remaining planned work: the AI Business Analyst and the frontend dashboard — see [Roadmap](#roadmap).
 
 ---
 
@@ -279,8 +298,8 @@ Windows' "App execution alias" can intercept the `python` command. Use the `py` 
 Originally scoped as a 4-phase build (3–3.5 hrs/day):
 
 - **Phase 1 — Foundation + Customer Intelligence:** Data cleaning, EDA, RFM segmentation, backend skeleton *(done)*
-- **Phase 2 — Predictive Intelligence:** Churn prediction, CLV, product recommendations *(notebooks done; backend in progress)*
-- **Phase 3 — Forecasting & Anomaly Detection:** Sales forecasting, anomaly detection *(notebooks done)*
+- **Phase 2 — Predictive Intelligence:** Churn prediction, CLV, product recommendations *(done — notebooks + backend)*
+- **Phase 3 — Forecasting & Anomaly Detection:** Sales forecasting, anomaly detection *(done — notebooks + backend)*
 - **Phase 4 — AI Analyst + Dashboard:** Natural-language business Q&A, full dashboard, deployment *(not started)*
 
 ---
