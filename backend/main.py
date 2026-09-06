@@ -2,12 +2,22 @@ import joblib
 import pandas as pd
 from datetime import date
 from typing import List
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException, Query
 from backend.core.database import SessionLocal
 from backend.models.customer import Customer
 from backend.schemas.customers import CustomerSchema
 
 app = FastAPI()
+
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Churn Model
 churn_model = joblib.load("ml/churn_prediction/churn_model.pkl")
