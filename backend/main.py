@@ -150,3 +150,23 @@ def get_dashboard_summary():
         "churned_customers": churned_count,
         "segment_breakdown": dict(segment_counts)
     }
+
+@app.get("/products/{product_name}/demand-forecast")
+def get_demand_forecast(product_name: str, days: int = 30):
+    product_sales = df_sales[df_sales['Description'] == product_name]
+
+    if product_sales.empty:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    recent_data = product_sales.sort_values('InvoiceDate').tail(90)
+    avg_daily_demand = recent_data['Quantity'].sum() / 90
+
+    forecasted_demand = round(avg_daily_demand * days)
+
+    return {
+        "product": product_name,
+        "avg_daily_demand": round(avg_daily_demand, 2),
+        "forecast_period_days": days,
+        "forecasted_demand": forecasted_demand
+    }
+
