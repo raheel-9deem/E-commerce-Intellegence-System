@@ -54,7 +54,7 @@ Place the raw CSV at `data/raw/online_retail_II.csv` before running the notebook
 **Backend:** Python, FastAPI, Pydantic, SQLAlchemy, SQLite (development) → PostgreSQL-ready for production
 **Data / ML:** Pandas, NumPy, Scikit-learn, Prophet, Isolation Forest, joblib
 **AI (planned):** LLM API (Claude) for natural-language business Q&A
-**Frontend (planned):** React, Tailwind CSS, Recharts / Plotly
+**Frontend:** React (via Vite), plain JS for now; Tailwind CSS / Recharts / Plotly planned but not yet added
 **Tooling:** Jupyter Notebooks, Git/GitHub, Docker (optional, not yet used)
 
 ---
@@ -140,7 +140,7 @@ This means the notebooks aren't just scratch work to throw away — they're the 
 | `08_forecasting.ipynb` | ✅ Done | Prophet model — daily sales forecast, trend/weekly/yearly seasonality analyzed |
 | `09_anomaly_detection.ipynb` | ✅ Done | Isolation Forest on invoice-level summaries — flagged large-volume/high-value wholesale-style orders |
 | Backend (FastAPI) | ✅ Done | All 7 ML/analytics modules exposed via API, CORS-enabled, routes split into per-module files — see below |
-| Frontend (React) | ⬜ Not started | |
+| Frontend (React) | 🟡 In progress | Vite + React app scaffolded; dashboard page fetches and renders 4 endpoints live — see below |
 | AI Business Analyst | ⬜ Not started | |
 
 ### Backend — complete
@@ -148,7 +148,7 @@ This means the notebooks aren't just scratch work to throw away — they're the 
 - **Database:** SQLite (`ecommerce.db`) via the SQLAlchemy ORM. SQLite was chosen for zero-setup local development; because SQLAlchemy abstracts the database layer, moving to PostgreSQL later is a one-line connection-string change in `backend/core/database.py`, not a rewrite.
 - **`Customer` table** (`backend/models/customer.py`): `id`, `recency`, `frequency`, `monetary`, `segment`, `churned`, `clv`, `avg_order_value`, `unique_products`, `tenure_days`. Seeded with all 5,878 customers from `data/processed/clv_results.csv`, with `unique_products` and `tenure_days` re-derived from the cleaned sales data at seed time (they weren't present in the CLV CSV — see `backend/seed_data.py` for how they're computed).
 - **`CustomerSchema`** (`backend/schemas/customer.py`): Pydantic response model, decoupling the API's public shape from the internal DB model.
-- **CORS enabled** for `http://localhost:3000` (the default React dev server address), so the planned frontend can call this API directly from the browser.
+- **CORS enabled** for `http://localhost:3000` and `http://localhost:5173` (Vite's default dev server port), so the frontend can call this API directly from the browser.
 - **Routes are organized by module** under `backend/api/`, each as its own `APIRouter` with a shared prefix, and wired together in `main.py` via `app.include_router(...)`:
 
 | File | Prefix | Endpoints |
@@ -174,6 +174,19 @@ This means the notebooks aren't just scratch work to throw away — they're the 
   - `GET /dashboard/summary` — aggregate stats in one call: total customers, total revenue, average CLV, churned count, and a segment-wise breakdown
 - **Important — route ordering:** FastAPI matches routes top-to-bottom, and a path parameter like `{customer_id}` matches *any* string. Fixed-path routes (e.g. `/customers/top-clv`) must be declared **above** wildcard routes (e.g. `/customers/{customer_id}`) within the same router, or the wildcard route swallows the request first.
 - Interactive, auto-generated API docs are available at `/docs` once the server is running — endpoints are grouped there by the `tags` set on each router.
+
+---
+
+### Frontend — what's live right now
+
+- **Scaffolded with Vite** (`npm create vite@latest frontend -- --template react`), plain JavaScript (no TypeScript yet), ESLint enabled.
+- **`frontend/src/App.jsx`** is currently the entire app (single component, no routing/component-splitting yet). It uses React's `useState` + `useEffect` + the browser's built-in `fetch` to call the backend on load and render:
+  - `/dashboard/summary` — headline stats
+  - `/customers/top-clv` — top 5 customers by CLV
+  - `/transactions/anomalies` — top 5 flagged anomalies
+  - `/sales/forecast` — next 7 days of predicted sales
+- **Not yet wired up:** the endpoints that require user input (`/customers/segment/{name}`, `/customers/{id}`, `/customers/{id}/churn-prediction`, `/products/{name}/similar`, `/products/{name}/demand-forecast`) — these need an input field + button in the UI, which hasn't been built yet.
+- Run it with `npm run dev` from `frontend/` (see [Getting Started](#getting-started-setup-from-scratch)) — it serves on `http://localhost:5173` by default.
 
 ---
 
@@ -250,6 +263,20 @@ Once running, open:
 - `http://127.0.0.1:8000/docs` — interactive API documentation (Swagger UI) — the easiest way to explore and test every endpoint
 
 If you change the `Customer` model's columns, the database schema does **not** update automatically — delete `ecommerce.db` and re-run steps 1 and 2.
+
+---
+
+## Running the Frontend
+
+The backend must already be running (see above) — the frontend fetches live data from it on load.
+
+```bash
+cd frontend
+npm install      # first time only
+npm run dev
+```
+
+Open the URL it prints (default `http://localhost:5173`). If you see a CORS error in the browser console, check that `backend/main.py`'s `allow_origins` list includes the port Vite is actually running on.
 
 ---
 
