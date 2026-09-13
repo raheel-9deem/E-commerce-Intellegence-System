@@ -54,7 +54,7 @@ Place the raw CSV at `data/raw/online_retail_II.csv` before running the notebook
 **Backend:** Python, FastAPI, Pydantic, SQLAlchemy, SQLite (development) → PostgreSQL-ready for production
 **Data / ML:** Pandas, NumPy, Scikit-learn, Prophet, Isolation Forest, joblib
 **AI (planned):** LLM API (Claude) for natural-language business Q&A
-**Frontend:** React (via Vite), plain JS for now; Tailwind CSS / Recharts / Plotly planned but not yet added
+**Frontend:** React (via Vite), Tailwind CSS v4; Recharts / Plotly still planned for charts
 **Tooling:** Jupyter Notebooks, Git/GitHub, Docker (optional, not yet used)
 
 ---
@@ -140,7 +140,7 @@ This means the notebooks aren't just scratch work to throw away — they're the 
 | `08_forecasting.ipynb` | ✅ Done | Prophet model — daily sales forecast, trend/weekly/yearly seasonality analyzed |
 | `09_anomaly_detection.ipynb` | ✅ Done | Isolation Forest on invoice-level summaries — flagged large-volume/high-value wholesale-style orders |
 | Backend (FastAPI) | ✅ Done | All 7 ML/analytics modules exposed via API, CORS-enabled, routes split into per-module files — see below |
-| Frontend (React) | 🟡 In progress | Vite + React app scaffolded; dashboard page fetches and renders 4 endpoints live — see below |
+| Frontend (React) | ✅ Done | All 10 endpoints wired up and styled with Tailwind CSS — see below |
 | AI Business Analyst | ⬜ Not started | |
 
 ### Backend — complete
@@ -177,15 +177,14 @@ This means the notebooks aren't just scratch work to throw away — they're the 
 
 ---
 
-### Frontend — what's live right now
+### Frontend — complete
 
 - **Scaffolded with Vite** (`npm create vite@latest frontend -- --template react`), plain JavaScript (no TypeScript yet), ESLint enabled.
-- **`frontend/src/App.jsx`** is currently the entire app (single component, no routing/component-splitting yet). It uses React's `useState` + `useEffect` + the browser's built-in `fetch` to call the backend on load and render:
-  - `/dashboard/summary` — headline stats
-  - `/customers/top-clv` — top 5 customers by CLV
-  - `/transactions/anomalies` — top 5 flagged anomalies
-  - `/sales/forecast` — next 7 days of predicted sales
-- **Not yet wired up:** the endpoints that require user input (`/customers/segment/{name}`, `/customers/{id}`, `/customers/{id}/churn-prediction`, `/products/{name}/similar`, `/products/{name}/demand-forecast`) — these need an input field + button in the UI, which hasn't been built yet.
+- **Styled with Tailwind CSS v4**, installed via the dedicated Vite plugin (`npm install tailwindcss @tailwindcss/vite`, registered in `vite.config.js`, activated with a single `@import "tailwindcss";` in `src/index.css` — no separate `tailwind.config.js`/PostCSS setup needed in v4).
+- **`frontend/src/App.jsx`** is currently the entire app (single component, no routing/component-splitting yet). It uses React's `useState` + `useEffect` + the browser's built-in `fetch` to call the backend and render **all 10 endpoints**, as a set of styled cards:
+  - Load-on-mount (no input needed): `/dashboard/summary`, `/customers/top-clv`, `/transactions/anomalies`, `/sales/forecast`
+  - Search-on-demand (text input + button, each with its own `useState` pair): `/customers/{id}` + `/customers/{id}/churn-prediction` (one search box drives both), `/products/{name}/similar`, `/customers/segment/{name}`, `/products/{name}/demand-forecast`
+- **Known rough edges (intentional, not yet addressed):** everything lives in one large `App.jsx` — no component-splitting yet. This is next on the list, along with extracting the repeated "input + button + card" pattern into a reusable component.
 - Run it with `npm run dev` from `frontend/` (see [Getting Started](#getting-started-setup-from-scratch)) — it serves on `http://localhost:5173` by default.
 
 ---
@@ -318,6 +317,12 @@ This means the model was trained/saved with a different scikit-learn version tha
 **`python` command not found on Windows, but you know Python is installed**
 Windows' "App execution alias" can intercept the `python` command. Use the `py` launcher instead: `py --version`, `py -0` (lists all installed versions), `py -3.11 -m venv venv`.
 
+**React app shows a blank white screen, console says `does not provide an export named 'default'`**
+This means `export default App;` is missing (or got deleted) from the end of `App.jsx` — usually happens after pasting in a large block of new JSX. Check the end of the file has, in order: the closing `);` for `return(`, the closing `}` for the `App` function, then `export default App;` on its own line.
+
+**Tailwind classes have no visual effect — page renders but with no styling at all**
+First confirm `frontend/src/main.jsx` imports the CSS file (`import './index.css'`) and that `index.css` contains `@import "tailwindcss";`. If both are correct and it still doesn't work, check `package.json` — if `tailwindcss` and `@tailwindcss/vite` aren't listed under `dependencies`/`devDependencies`, the install silently failed even though `vite.config.js` references them. Re-run `npm install tailwindcss @tailwindcss/vite`, confirm they now appear in `package.json`, then restart the dev server (config changes require a restart, not just a browser refresh).
+
 ---
 
 ## Roadmap
@@ -327,7 +332,7 @@ Originally scoped as a 4-phase build (3–3.5 hrs/day):
 - **Phase 1 — Foundation + Customer Intelligence:** Data cleaning, EDA, RFM segmentation, backend skeleton *(done)*
 - **Phase 2 — Predictive Intelligence:** Churn prediction, CLV, product recommendations *(done — notebooks + backend)*
 - **Phase 3 — Forecasting & Anomaly Detection:** Sales forecasting, anomaly detection *(done — notebooks + backend)*
-- **Phase 4 — AI Analyst + Dashboard:** Natural-language business Q&A, full dashboard, deployment *(not started)*
+- **Phase 4 — AI Analyst + Dashboard:** Natural-language business Q&A, full dashboard, deployment *(dashboard done; AI Analyst + deployment not started)*
 
 ---
 
@@ -347,4 +352,4 @@ These were consciously cut or simplified to fit the project's timeline — not o
 ## Author
 
 **Raheel Nadeem**
-[Website](https://raheelnadeem.online/) · [LinkedIn](https://linkedin.com/in/raheel-nadeem) · [GitHub](https://github.com/raheel-9deem)
+[Website](https://raheelnadeem.online) · [LinkedIn](https://linkedin.com/in/raheel-nadeem) · [GitHub](https://github.com/raheel-9deem)
