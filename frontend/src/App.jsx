@@ -12,6 +12,8 @@ function App() {
   const [churnResult, setChurnResult] = useState(null);
   const [productName, setProductName] = useState('');
   const [similarProducts, setSimilarProducts] = useState(null);
+  const [segmentName, setSegmentName] = useState('');
+  const [segmentCustomers, setSegmentCustomers] = useState(null);
 
   useEffect(() => {
     fetch(`${BASE_URL}/dashboard/summary`)
@@ -49,6 +51,12 @@ function App() {
     fetch(`${BASE_URL}/products/${productName}/similar`)
       .then((res) => res.json())
       .then((data) => setSimilarProducts(data));
+  }
+
+  function searchSegment() {
+    fetch(`${BASE_URL}/customers/segment/${segmentName}`)
+      .then((res) => res.json())
+      .then((data) => setSegmentCustomers(data));
   }
 
   return (
@@ -90,6 +98,23 @@ function App() {
         <ul>
           {Object.entries(similarProducts).map(([name, score]) => (
             <li key={name}>{name} — Similarity: {score.toFixed(2)}</li>
+          ))}
+        </ul>
+      )}
+
+      <h2>Filter Customers by Segment</h2>
+      <input
+        type="text"
+        value={segmentName}
+        onChange={(e) => setSegmentName(e.target.value)}
+        placeholder="e.g. VIP, Regular, At Risk"
+      />
+      <button onClick={searchSegment}>Filter</button>
+
+      {segmentCustomers && (
+        <ul>
+          {segmentCustomers.map((customer) => (
+            <li key={customer.id}>{customer.id} — CLV: {customer.clv}</li>
           ))}
         </ul>
       )}
