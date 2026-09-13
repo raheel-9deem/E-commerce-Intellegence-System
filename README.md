@@ -347,4 +347,4 @@ These were consciously cut or simplified to fit the project's timeline — not o
 ## Author
 
 **Raheel Nadeem**
-[Website](https://raheelnadeem.online) · [LinkedIn](https://linkedin.com/in/raheel-nadeem) · [GitHub](https://github.com/raheel-9deem)
+[Website](https://raheelnadeem.online/) · [LinkedIn](https://linkedin.com/in/raheel-nadeem) · [GitHub](https://github.com/raheel-9deem)
