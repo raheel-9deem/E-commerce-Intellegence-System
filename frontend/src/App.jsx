@@ -14,6 +14,8 @@ function App() {
   const [similarProducts, setSimilarProducts] = useState(null);
   const [segmentName, setSegmentName] = useState('');
   const [segmentCustomers, setSegmentCustomers] = useState(null);
+  const [demandProduct, setDemandProduct] = useState('');
+  const [demandResult, setDemandResult] = useState(null);
 
   useEffect(() => {
     fetch(`${BASE_URL}/dashboard/summary`)
@@ -57,6 +59,12 @@ function App() {
     fetch(`${BASE_URL}/customers/segment/${segmentName}`)
       .then((res) => res.json())
       .then((data) => setSegmentCustomers(data));
+  }
+
+  function searchDemand() {
+    fetch(`${BASE_URL}/products/${demandProduct}/demand-forecast`)
+      .then((res) => res.json())
+      .then((data) => setDemandResult(data));
   }
 
   return (
@@ -117,6 +125,22 @@ function App() {
             <li key={customer.id}>{customer.id} — CLV: {customer.clv}</li>
           ))}
         </ul>
+      )}
+
+      <h2>Product Demand Forecast</h2>
+      <input
+        type="text"
+        value={demandProduct}
+        onChange={(e) => setDemandProduct(e.target.value)}
+        placeholder="Enter Product Name"
+      />
+      <button onClick={searchDemand}>Forecast</button>
+
+      {demandResult && (
+        <div>
+          <p>Avg Daily Demand: {demandResult.avg_daily_demand}</p>
+          <p>Forecasted Demand ({demandResult.forecast_period_days} days): {demandResult.forecasted_demand}</p>
+        </div>
       )}
 
       <h2>Summary</h2>
