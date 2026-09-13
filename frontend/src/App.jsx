@@ -68,113 +68,188 @@ function App() {
   }
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial' }}>
-      <h1>Business Dashboard</h1>
+    <div className="min-h-screen bg-gray-100 p-8">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">Business Dashboard</h1>
 
-      <h2>Search Customer</h2>
-      <input
-        type="text"
-        value={customerId}
-        onChange={(e) => setCustomerId(e.target.value)}
-        placeholder="Enter Customer ID (e.g. 12346)"
-      />
-      <button onClick={searchCustomer}>Search</button>
-
-      {customerResult && (
-        <div>
-          <p>Segment: {customerResult.segment}</p>
-          <p>CLV: {customerResult.clv}</p>
-          <p>Recency: {customerResult.recency}</p>
-          <p>Frequency: {customerResult.frequency}</p>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-4 gap-4 mb-8">
+        <div className="bg-white rounded-lg shadow p-4">
+          <p className="text-sm text-gray-500">Total Customers</p>
+          <p className="text-2xl font-bold text-gray-800">{summary.total_customers}</p>
         </div>
-      )}
+        <div className="bg-white rounded-lg shadow p-4">
+          <p className="text-sm text-gray-500">Total Revenue</p>
+          <p className="text-2xl font-bold text-gray-800">{summary.total_revenue}</p>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <p className="text-sm text-gray-500">Average CLV</p>
+          <p className="text-2xl font-bold text-gray-800">{summary.avg_clv}</p>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <p className="text-sm text-gray-500">Churned Customers</p>
+          <p className="text-2xl font-bold text-red-500">{summary.churned_customers}</p>
+        </div>
+      </div>
 
-      {churnResult && (
-        <p>Will Churn: {churnResult.will_churn ? 'Yes' : 'No'}</p>
-      )}
-
-      <h2>Find Similar Products</h2>
-      <input
-        type="text"
-        value={productName}
-        onChange={(e) => setProductName(e.target.value)}
-        placeholder="Enter Product Name (e.g. WHITE HANGING HEART T-LIGHT HOLDER)"
-      />
-      <button onClick={searchProduct}>Search</button>
-
-      {similarProducts && (
-        <ul>
-          {Object.entries(similarProducts).map(([name, score]) => (
-            <li key={name}>{name} — Similarity: {score.toFixed(2)}</li>
+      {/* Top Customers */}
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-3">Top 5 Customers by CLV</h2>
+        <ul className="divide-y divide-gray-200">
+          {topCustomers.map((customer) => (
+            <li key={customer.id} className="py-2 text-gray-700">
+              {customer.id} — {customer.segment} — CLV: {customer.clv}
+            </li>
           ))}
         </ul>
-      )}
+      </div>
 
-      <h2>Filter Customers by Segment</h2>
-      <input
-        type="text"
-        value={segmentName}
-        onChange={(e) => setSegmentName(e.target.value)}
-        placeholder="e.g. VIP, Regular, At Risk"
-      />
-      <button onClick={searchSegment}>Filter</button>
+      {/* Customer Search */}
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-3">Search Customer</h2>
+        <div className="flex gap-2 mb-4">
+          <input
+            type="text"
+            value={customerId}
+            onChange={(e) => setCustomerId(e.target.value)}
+            placeholder="Enter Customer ID (e.g. 12346)"
+            className="border border-gray-300 rounded px-3 py-2 flex-1"
+          />
+          <button
+            onClick={searchCustomer}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Search
+          </button>
+        </div>
 
-      {segmentCustomers && (
-        <ul>
-          {segmentCustomers.map((customer) => (
-            <li key={customer.id}>{customer.id} — CLV: {customer.clv}</li>
+        {customerResult && (
+          <div className="text-gray-700 space-y-1">
+            <p>Segment: {customerResult.segment}</p>
+            <p>CLV: {customerResult.clv}</p>
+            <p>Recency: {customerResult.recency}</p>
+            <p>Frequency: {customerResult.frequency}</p>
+          </div>
+        )}
+
+        {churnResult && (
+          <p className="mt-2 font-semibold">
+            Will Churn: <span className={churnResult.will_churn ? 'text-red-500' : 'text-green-600'}>
+              {churnResult.will_churn ? 'Yes' : 'No'}
+            </span>
+          </p>
+        )}
+      </div>
+
+      {/* Product Recommendation Search */}
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-3">Find Similar Products</h2>
+        <div className="flex gap-2 mb-4">
+          <input
+            type="text"
+            value={productName}
+            onChange={(e) => setProductName(e.target.value)}
+            placeholder="Enter Product Name"
+            className="border border-gray-300 rounded px-3 py-2 flex-1"
+          />
+          <button
+            onClick={searchProduct}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Search
+          </button>
+        </div>
+
+        {similarProducts && (
+          <ul className="divide-y divide-gray-200">
+            {Object.entries(similarProducts).map(([name, score]) => (
+              <li key={name} className="py-2 text-gray-700">
+                {name} — Similarity: {score.toFixed(2)}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Segment Filter */}
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-3">Filter Customers by Segment</h2>
+        <div className="flex gap-2 mb-4">
+          <input
+            type="text"
+            value={segmentName}
+            onChange={(e) => setSegmentName(e.target.value)}
+            placeholder="e.g. VIP, Regular, At Risk"
+            className="border border-gray-300 rounded px-3 py-2 flex-1"
+          />
+          <button
+            onClick={searchSegment}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Filter
+          </button>
+        </div>
+
+        {segmentCustomers && (
+          <ul className="divide-y divide-gray-200">
+            {segmentCustomers.map((customer) => (
+              <li key={customer.id} className="py-2 text-gray-700">
+                {customer.id} — CLV: {customer.clv}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Demand Forecast */}
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-3">Product Demand Forecast</h2>
+        <div className="flex gap-2 mb-4">
+          <input
+            type="text"
+            value={demandProduct}
+            onChange={(e) => setDemandProduct(e.target.value)}
+            placeholder="Enter Product Name"
+            className="border border-gray-300 rounded px-3 py-2 flex-1"
+          />
+          <button
+            onClick={searchDemand}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Forecast
+          </button>
+        </div>
+
+        {demandResult && (
+          <div className="text-gray-700 space-y-1">
+            <p>Avg Daily Demand: {demandResult.avg_daily_demand}</p>
+            <p>Forecasted Demand ({demandResult.forecast_period_days} days): {demandResult.forecasted_demand}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Anomalies */}
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-3">Flagged Anomalies</h2>
+        <ul className="divide-y divide-gray-200">
+          {anomalies.map((item) => (
+            <li key={item.Invoice} className="py-2 text-gray-700">
+              Invoice {item.Invoice} — Amount: {item.TotalAmount}
+            </li>
           ))}
         </ul>
-      )}
+      </div>
 
-      <h2>Product Demand Forecast</h2>
-      <input
-        type="text"
-        value={demandProduct}
-        onChange={(e) => setDemandProduct(e.target.value)}
-        placeholder="Enter Product Name"
-      />
-      <button onClick={searchDemand}>Forecast</button>
-
-      {demandResult && (
-        <div>
-          <p>Avg Daily Demand: {demandResult.avg_daily_demand}</p>
-          <p>Forecasted Demand ({demandResult.forecast_period_days} days): {demandResult.forecasted_demand}</p>
-        </div>
-      )}
-
-      <h2>Summary</h2>
-      <p>Total Customers: {summary.total_customers}</p>
-      <p>Total Revenue: {summary.total_revenue}</p>
-      <p>Average CLV: {summary.avg_clv}</p>
-      <p>Churned Customers: {summary.churned_customers}</p>
-
-      <h2>Top 5 Customers by CLV</h2>
-      <ul>
-        {topCustomers.map((customer) => (
-          <li key={customer.id}>
-            {customer.id} — {customer.segment} — CLV: {customer.clv}
-          </li>
-        ))}
-      </ul>
-
-      <h2>Flagged Anomalies</h2>
-      <ul>
-        {anomalies.map((item) => (
-          <li key={item.Invoice}>
-            Invoice {item.Invoice} — Amount: {item.TotalAmount}
-          </li>
-        ))}
-      </ul>
-
-      <h2>7-Day Sales Forecast</h2>
-      <ul>
-        {forecast.map((day) => (
-          <li key={day.ds}>
-            {day.ds} — Predicted: {day.yhat}
-          </li>
-        ))}
-      </ul>
+      {/* Forecast */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-3">7-Day Sales Forecast</h2>
+        <ul className="divide-y divide-gray-200">
+          {forecast.map((day) => (
+            <li key={day.ds} className="py-2 text-gray-700">
+              {day.ds} — Predicted: {day.yhat}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
