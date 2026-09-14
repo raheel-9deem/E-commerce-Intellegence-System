@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import SummaryCard from './components/SummaryCard';
 import SearchBox from './components/SearchBox';
 import ListCard from './components/ListCard';
+import ForecastChart from './components/ForecastChart';
+import SegmentPieChart from './components/SegmentPieChart';
+import TopCustomersBarChart from './components/TopCustomersBarChart';
 
 const BASE_URL = 'http://127.0.0.1:8000';
 
@@ -81,14 +84,12 @@ function App() {
         <SummaryCard title="Average CLV" value={summary.avg_clv} />
         <SummaryCard title="Churned Customers" value={summary.churned_customers} color="text-red-500" />
       </div>
+      <SegmentPieChart data={summary.segment_breakdown} />
 
       {/* Top Customers */}
-      <ListCard
-        title="Top 5 Customers by CLV"
-        items={topCustomers}
-        getKey={(customer) => customer.id}
-        renderItem={(customer) => `${customer.id} — ${customer.segment} — CLV: ${customer.clv}`}
-      />
+      <TopCustomersBarChart data={topCustomers} />
+
+
       {/* Anomalies */}
       <ListCard
         title="Flagged Anomalies"
@@ -98,12 +99,7 @@ function App() {
       />
 
       {/* Forecast */}
-      <ListCard
-        title="7-Day Sales Forecast"
-        items={forecast}
-        getKey={(day) => day.ds}
-        renderItem={(day) => `${day.ds} — Predicted: ${day.yhat}`}
-      />
+      <ForecastChart data={forecast} />
 
       {/* Customer Search */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
