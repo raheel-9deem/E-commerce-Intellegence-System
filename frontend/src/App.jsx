@@ -22,6 +22,7 @@ function App() {
   const [segmentCustomers, setSegmentCustomers] = useState(null);
   const [demandProduct, setDemandProduct] = useState('');
   const [demandResult, setDemandResult] = useState(null);
+  const [forecastDays, setForecastDays] = useState('7');
 
   useEffect(() => {
     fetch(`${BASE_URL}/dashboard/summary`)
@@ -36,9 +37,7 @@ function App() {
       .then((res) => res.json())
       .then((data) => setAnomalies(data));
 
-    fetch(`${BASE_URL}/sales/forecast?days=7`)
-      .then((res) => res.json())
-      .then((data) => setForecast(data));
+    fetchForecast();
   }, []);
 
   if (!summary) {
@@ -59,6 +58,12 @@ function App() {
     fetch(`${BASE_URL}/products/${productName}/similar`)
       .then((res) => res.json())
       .then((data) => setSimilarProducts(data));
+  }
+
+  function fetchForecast() {
+    fetch(`${BASE_URL}/sales/forecast?days=${forecastDays}`)
+      .then((res) => res.json())
+      .then((data) => setForecast(data));
   }
 
   function searchSegment() {
@@ -99,7 +104,17 @@ function App() {
       />
 
       {/* Forecast */}
-      <ForecastChart data={forecast} />
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-3">Sales Forecast</h2>
+        <SearchBox
+          placeholder="Enter no. of days for forecast"
+          value={forecastDays}
+          onChange={(e) => setForecastDays(e.target.value)}
+          onSearch={fetchForecast}
+          buttonText="Update Forecast"
+        />
+        <ForecastChart data={forecast} />
+      </div>
 
       {/* Customer Search */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
@@ -162,13 +177,12 @@ function App() {
         />
 
         {segmentCustomers && (
-          <ul className="divide-y divide-gray-200">
-            {segmentCustomers.map((customer) => (
-              <li key={customer.id} className="py-2 text-gray-700">
-                {customer.id} — CLV: {customer.clv}
-              </li>
-            ))}
-          </ul>
+          <ListCard
+            title="Segment Results"
+            items={segmentCustomers || []}
+            getKey={(customer) => customer.id}
+            renderItem={(customer) => `${customer.id} — CLV: ${customer.clv}`}
+          />
         )}
       </div>
 
