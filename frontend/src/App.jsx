@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import SummaryCard from './components/SummaryCard';
+import SearchBox from './components/SearchBox';
+import ListCard from './components/ListCard';
 
 const BASE_URL = 'http://127.0.0.1:8000';
 
@@ -73,54 +76,44 @@ function App() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-500">Total Customers</p>
-          <p className="text-2xl font-bold text-gray-800">{summary.total_customers}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-500">Total Revenue</p>
-          <p className="text-2xl font-bold text-gray-800">{summary.total_revenue}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-500">Average CLV</p>
-          <p className="text-2xl font-bold text-gray-800">{summary.avg_clv}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-500">Churned Customers</p>
-          <p className="text-2xl font-bold text-red-500">{summary.churned_customers}</p>
-        </div>
+        <SummaryCard title="Total Customers" value={summary.total_customers} />
+        <SummaryCard title="Total Revenue" value={summary.total_revenue} />
+        <SummaryCard title="Average CLV" value={summary.avg_clv} />
+        <SummaryCard title="Churned Customers" value={summary.churned_customers} color="text-red-500" />
       </div>
 
       {/* Top Customers */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-3">Top 5 Customers by CLV</h2>
-        <ul className="divide-y divide-gray-200">
-          {topCustomers.map((customer) => (
-            <li key={customer.id} className="py-2 text-gray-700">
-              {customer.id} — {customer.segment} — CLV: {customer.clv}
-            </li>
-          ))}
-        </ul>
-      </div>
+      <ListCard
+        title="Top 5 Customers by CLV"
+        items={topCustomers}
+        getKey={(customer) => customer.id}
+        renderItem={(customer) => `${customer.id} — ${customer.segment} — CLV: ${customer.clv}`}
+      />
+      {/* Anomalies */}
+      <ListCard
+        title="Flagged Anomalies"
+        items={anomalies}
+        getKey={(item) => item.Invoice}
+        renderItem={(item) => `Invoice ${item.Invoice} — Amount: ${item.TotalAmount}`}
+      />
+
+      {/* Forecast */}
+      <ListCard
+        title="7-Day Sales Forecast"
+        items={forecast}
+        getKey={(day) => day.ds}
+        renderItem={(day) => `${day.ds} — Predicted: ${day.yhat}`}
+      />
 
       {/* Customer Search */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <h2 className="text-xl font-semibold text-gray-800 mb-3">Search Customer</h2>
-        <div className="flex gap-2 mb-4">
-          <input
-            type="text"
-            value={customerId}
-            onChange={(e) => setCustomerId(e.target.value)}
-            placeholder="Enter Customer ID (e.g. 12346)"
-            className="border border-gray-300 rounded px-3 py-2 flex-1"
-          />
-          <button
-            onClick={searchCustomer}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Search
-          </button>
-        </div>
+        <SearchBox
+          placeholder="Enter Customer ID (e.g. 12346)"
+          value={customerId}
+          onChange={(e) => setCustomerId(e.target.value)}
+          onSearch={searchCustomer}
+        />
 
         {customerResult && (
           <div className="text-gray-700 space-y-1">
@@ -143,21 +136,12 @@ function App() {
       {/* Product Recommendation Search */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <h2 className="text-xl font-semibold text-gray-800 mb-3">Find Similar Products</h2>
-        <div className="flex gap-2 mb-4">
-          <input
-            type="text"
-            value={productName}
-            onChange={(e) => setProductName(e.target.value)}
-            placeholder="Enter Product Name"
-            className="border border-gray-300 rounded px-3 py-2 flex-1"
-          />
-          <button
-            onClick={searchProduct}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Search
-          </button>
-        </div>
+        <SearchBox
+          placeholder="Enter Product Name"
+          value={productName}
+          onChange={(e) => setProductName(e.target.value)}
+          onSearch={searchProduct}
+        />
 
         {similarProducts && (
           <ul className="divide-y divide-gray-200">
@@ -173,21 +157,13 @@ function App() {
       {/* Segment Filter */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <h2 className="text-xl font-semibold text-gray-800 mb-3">Filter Customers by Segment</h2>
-        <div className="flex gap-2 mb-4">
-          <input
-            type="text"
-            value={segmentName}
-            onChange={(e) => setSegmentName(e.target.value)}
-            placeholder="e.g. VIP, Regular, At Risk"
-            className="border border-gray-300 rounded px-3 py-2 flex-1"
-          />
-          <button
-            onClick={searchSegment}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Filter
-          </button>
-        </div>
+        <SearchBox
+          placeholder="e.g. VIP, Regular, At Risk"
+          value={segmentName}
+          onChange={(e) => setSegmentName(e.target.value)}
+          onSearch={searchSegment}
+          buttonText="Filter"
+        />
 
         {segmentCustomers && (
           <ul className="divide-y divide-gray-200">
@@ -203,21 +179,13 @@ function App() {
       {/* Demand Forecast */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <h2 className="text-xl font-semibold text-gray-800 mb-3">Product Demand Forecast</h2>
-        <div className="flex gap-2 mb-4">
-          <input
-            type="text"
-            value={demandProduct}
-            onChange={(e) => setDemandProduct(e.target.value)}
-            placeholder="Enter Product Name"
-            className="border border-gray-300 rounded px-3 py-2 flex-1"
-          />
-          <button
-            onClick={searchDemand}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Forecast
-          </button>
-        </div>
+        <SearchBox
+          placeholder="Enter Product Name"
+          value={demandProduct}
+          onChange={(e) => setDemandProduct(e.target.value)}
+          onSearch={searchDemand}
+          buttonText="Forecast"
+        />
 
         {demandResult && (
           <div className="text-gray-700 space-y-1">
@@ -225,30 +193,6 @@ function App() {
             <p>Forecasted Demand ({demandResult.forecast_period_days} days): {demandResult.forecasted_demand}</p>
           </div>
         )}
-      </div>
-
-      {/* Anomalies */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-3">Flagged Anomalies</h2>
-        <ul className="divide-y divide-gray-200">
-          {anomalies.map((item) => (
-            <li key={item.Invoice} className="py-2 text-gray-700">
-              Invoice {item.Invoice} — Amount: {item.TotalAmount}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Forecast */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-3">7-Day Sales Forecast</h2>
-        <ul className="divide-y divide-gray-200">
-          {forecast.map((day) => (
-            <li key={day.ds} className="py-2 text-gray-700">
-              {day.ds} — Predicted: {day.yhat}
-            </li>
-          ))}
-        </ul>
       </div>
     </div>
   );
