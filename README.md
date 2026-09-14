@@ -54,7 +54,7 @@ Place the raw CSV at `data/raw/online_retail_II.csv` before running the notebook
 **Backend:** Python, FastAPI, Pydantic, SQLAlchemy, SQLite (development) → PostgreSQL-ready for production
 **Data / ML:** Pandas, NumPy, Scikit-learn, Prophet, Isolation Forest, joblib
 **AI (planned):** LLM API (Claude) for natural-language business Q&A
-**Frontend:** React (via Vite), Tailwind CSS v4; Recharts / Plotly still planned for charts
+**Frontend:** React (via Vite), Tailwind CSS v4, Recharts
 **Tooling:** Jupyter Notebooks, Git/GitHub, Docker (optional, not yet used)
 
 ---
@@ -100,7 +100,10 @@ ai-ecommerce/
 │   ├── query_templates/          # Predefined question → stat mappings
 │   └── llm_client/               # LLM API wrapper for natural-language answers
 │
-├── frontend/                     # Planned: React + Tailwind dashboard
+├── frontend/                     # React + Tailwind dashboard
+│   └── src/
+│       ├── App.jsx               # Composition root — useState/useEffect/fetch + wires components together
+│       └── components/           # SummaryCard, SearchBox, ListCard, ForecastChart, SegmentPieChart, TopCustomersBarChart
 │
 ├── database/                     # Migrations / seed scripts (reserved; seeding currently lives in backend/seed_data.py)
 │
@@ -181,10 +184,19 @@ This means the notebooks aren't just scratch work to throw away — they're the 
 
 - **Scaffolded with Vite** (`npm create vite@latest frontend -- --template react`), plain JavaScript (no TypeScript yet), ESLint enabled.
 - **Styled with Tailwind CSS v4**, installed via the dedicated Vite plugin (`npm install tailwindcss @tailwindcss/vite`, registered in `vite.config.js`, activated with a single `@import "tailwindcss";` in `src/index.css` — no separate `tailwind.config.js`/PostCSS setup needed in v4).
-- **`frontend/src/App.jsx`** is currently the entire app (single component, no routing/component-splitting yet). It uses React's `useState` + `useEffect` + the browser's built-in `fetch` to call the backend and render **all 10 endpoints**, as a set of styled cards:
-  - Load-on-mount (no input needed): `/dashboard/summary`, `/customers/top-clv`, `/transactions/anomalies`, `/sales/forecast`
-  - Search-on-demand (text input + button, each with its own `useState` pair): `/customers/{id}` + `/customers/{id}/churn-prediction` (one search box drives both), `/products/{name}/similar`, `/customers/segment/{name}`, `/products/{name}/demand-forecast`
-- **Known rough edges (intentional, not yet addressed):** everything lives in one large `App.jsx` — no component-splitting yet. This is next on the list, along with extracting the repeated "input + button + card" pattern into a reusable component.
+- **Charted with Recharts** (`npm install recharts`) — three charts, each its own component:
+  - `ForecastChart.jsx` — line chart for `/sales/forecast`, paired with a `SearchBox` so the number of days is user-adjustable (re-fetches on demand, chart re-renders automatically since it's driven entirely by the `data` prop)
+  - `SegmentPieChart.jsx` — pie chart for the segment breakdown from `/dashboard/summary` (object-shaped API response converted to Recharts' required array-of-objects shape via `Object.entries(data).map(...)`)
+  - `TopCustomersBarChart.jsx` — bar chart for `/customers/top-clv`
+- **Componentized** (`frontend/src/components/`) — the repeated UI patterns were extracted out of `App.jsx`:
+  - `SummaryCard.jsx` — one stat box (`title`, `value`, optional `color` prop)
+  - `SearchBox.jsx` — the input+button pattern, reused across all 4 search-on-demand endpoints; the search behavior itself is passed in as an `onSearch` function prop, so the component has no knowledge of what it's searching
+  - `ListCard.jsx` — a titled list; takes `items`, a `getKey` function (for React's list-key requirement), and a `renderItem` function (so each list can format its rows differently) — used for anomalies and segment-filter results
+- **`App.jsx`** is now mostly composition — it holds the `useState`/`useEffect`/`fetch` calls and wires data into the components above, rather than containing all the JSX inline.
+- All **10 endpoints** are wired up:
+  - Load-on-mount: `/dashboard/summary`, `/customers/top-clv`, `/transactions/anomalies`, `/sales/forecast`
+  - Search-on-demand: `/customers/{id}` + `/customers/{id}/churn-prediction` (one search box drives both), `/products/{name}/similar`, `/customers/segment/{name}`, `/products/{name}/demand-forecast`
+- **Known rough edges (intentional, not yet addressed):** everything is on a single long page — no tabs/navigation yet, so it feels visually heavy despite being organized in code. Navigation/layout is next on the list, ahead of the planned AI Business Analyst.
 - Run it with `npm run dev` from `frontend/` (see [Getting Started](#getting-started-setup-from-scratch)) — it serves on `http://localhost:5173` by default.
 
 ---
@@ -332,7 +344,7 @@ Originally scoped as a 4-phase build (3–3.5 hrs/day):
 - **Phase 1 — Foundation + Customer Intelligence:** Data cleaning, EDA, RFM segmentation, backend skeleton *(done)*
 - **Phase 2 — Predictive Intelligence:** Churn prediction, CLV, product recommendations *(done — notebooks + backend)*
 - **Phase 3 — Forecasting & Anomaly Detection:** Sales forecasting, anomaly detection *(done — notebooks + backend)*
-- **Phase 4 — AI Analyst + Dashboard:** Natural-language business Q&A, full dashboard, deployment *(dashboard done; AI Analyst + deployment not started)*
+- **Phase 4 — AI Analyst + Dashboard:** Natural-language business Q&A, full dashboard, deployment *(dashboard done — Tailwind styling, Recharts charts, component-split; navigation/tabs, AI Analyst, and deployment not started)*
 
 ---
 
