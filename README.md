@@ -34,8 +34,8 @@ This README is written so a new contributor (or a future version of the author) 
 | **Product Recommendations** | Popularity-based + item-based collaborative filtering (cosine similarity) |
 | **Sales Forecasting** | Prophet time-series model to predict future daily revenue, with trend/seasonality breakdown |
 | **Anomaly Detection** | Isolation Forest to flag unusual invoices (e.g. abnormally large or high-value orders) |
-| **AI Business Analyst** *(planned)* | Natural-language Q&A over business metrics, powered by an LLM |
-| **Executive Dashboard** *(planned)* | React + Tailwind dashboard visualizing all of the above |
+| **AI Business Analyst** *(in progress)* | Natural-language Q&A over business metrics, powered by an LLM. The `ai/` module contains an Anthropic client wrapper; backend and frontend integration are still pending. |
+| **Executive Dashboard** *(complete)* | React + Tailwind dashboard visualizing all of the above, with charts and search interactions |
 
 ---
 
@@ -53,7 +53,7 @@ Place the raw CSV at `data/raw/online_retail_II.csv` before running the notebook
 
 **Backend:** Python, FastAPI, Pydantic, SQLAlchemy, SQLite (development) → PostgreSQL-ready for production
 **Data / ML:** Pandas, NumPy, Scikit-learn, Prophet, Isolation Forest, joblib
-**AI (planned):** LLM API (Claude) for natural-language business Q&A
+**AI:** Anthropic Claude API wrapper implemented in `ai/llm_client/`; backend + frontend integration still pending
 **Frontend:** React (via Vite), Tailwind CSS v4, Recharts
 **Tooling:** Jupyter Notebooks, Git/GitHub, Docker (optional, not yet used)
 
@@ -96,9 +96,9 @@ ai-ecommerce/
 │   ├── forecasting/
 │   └── anomaly_detection/
 │
-├── ai/                           # Planned: AI Business Analyst
-│   ├── query_templates/          # Predefined question → stat mappings
-│   └── llm_client/               # LLM API wrapper for natural-language answers
+├── ai/                           # AI Business Analyst
+│   ├── query_templates/          # Predefined question → stat mappings (reserved)
+│   └── llm_client/               # Anthropic Claude wrapper + test script for natural-language answers
 │
 ├── frontend/                     # React + Tailwind dashboard
 │   └── src/
@@ -144,7 +144,7 @@ This means the notebooks aren't just scratch work to throw away — they're the 
 | `09_anomaly_detection.ipynb` | ✅ Done | Isolation Forest on invoice-level summaries — flagged large-volume/high-value wholesale-style orders |
 | Backend (FastAPI) | ✅ Done | All 7 ML/analytics modules exposed via API, CORS-enabled, routes split into per-module files — see below |
 | Frontend (React) | ✅ Done | All 10 endpoints wired up and styled with Tailwind CSS — see below |
-| AI Business Analyst | ⬜ Not started | |
+| AI Business Analyst | 🔄 In progress | LLM client module added; API + frontend wiring still needed |
 
 ### Backend — complete
 
@@ -307,7 +307,7 @@ Open the URL it prints (default `http://localhost:5173`). If you see a CORS erro
 | GET | `/transactions/anomalies` | Top flagged anomalous invoices |
 | GET | `/dashboard/summary` | Aggregate business stats in one call |
 
-All ML/analytics modules from the notebooks (Segmentation/CLV, Churn, Recommendations, Demand Prediction, Forecasting, Anomaly Detection) are now exposed via the API, with a dashboard-summary endpoint on top. Remaining planned work: the AI Business Analyst and the frontend dashboard — see [Roadmap](#roadmap).
+All ML/analytics modules from the notebooks (Segmentation/CLV, Churn, Recommendations, Demand Prediction, Forecasting, Anomaly Detection) are now exposed via the API, with a dashboard-summary endpoint on top. Remaining planned work: backend/frontend integration for the AI Business Analyst, navigation/tabs, and deployment — see [Roadmap](#roadmap).
 
 ---
 
@@ -344,7 +344,7 @@ Originally scoped as a 4-phase build (3–3.5 hrs/day):
 - **Phase 1 — Foundation + Customer Intelligence:** Data cleaning, EDA, RFM segmentation, backend skeleton *(done)*
 - **Phase 2 — Predictive Intelligence:** Churn prediction, CLV, product recommendations *(done — notebooks + backend)*
 - **Phase 3 — Forecasting & Anomaly Detection:** Sales forecasting, anomaly detection *(done — notebooks + backend)*
-- **Phase 4 — AI Analyst + Dashboard:** Natural-language business Q&A, full dashboard, deployment *(dashboard done — Tailwind styling, Recharts charts, component-split; navigation/tabs, AI Analyst, and deployment not started)*
+- **Phase 4 — AI Analyst + Dashboard:** Natural-language business Q&A, full dashboard, deployment *(dashboard done — Tailwind styling, Recharts charts, component-split; AI Business Analyst module started with an Anthropic client wrapper, but backend API + frontend wiring and deployment are not started)*
 
 ---
 
