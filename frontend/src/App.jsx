@@ -23,6 +23,7 @@ function App() {
   const [demandProduct, setDemandProduct] = useState('');
   const [demandResult, setDemandResult] = useState(null);
   const [forecastDays, setForecastDays] = useState('7');
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     fetch(`${BASE_URL}/dashboard/summary`)
@@ -81,6 +82,33 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Business Dashboard</h1>
+
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => setActiveTab('overview')}
+          className={`px-4 py-2 rounded ${activeTab === 'overview' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
+        >
+          Overview
+        </button>
+        <button
+          onClick={() => setActiveTab('customers')}
+          className={`px-4 py-2 rounded ${activeTab === 'customers' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
+        >
+          Customers
+        </button>
+        <button
+          onClick={() => setActiveTab('products')}
+          className={`px-4 py-2 rounded ${activeTab === 'products' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
+        >
+          Products
+        </button>
+        <button
+          onClick={() => setActiveTab('sales')}
+          className={`px-4 py-2 rounded ${activeTab === 'sales' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
+        >
+          Sales
+        </button>
+      </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-4 gap-4 mb-8">
