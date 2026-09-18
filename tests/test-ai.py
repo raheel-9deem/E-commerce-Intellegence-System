@@ -12,7 +12,7 @@ client = Anthropic(
 def ask_claude(stats_summary: str, question: str) -> str:
     message = client.messages.create(
         model="step-3.7-flash",
-        max_tokens=8192,
+        max_tokens=4096,
         messages=[
             {
                 "role": "user",
@@ -21,3 +21,7 @@ def ask_claude(stats_summary: str, question: str) -> str:
         ]
     )
     return message.content[0].text
+
+result = ask_claude("Total revenue: $500,000. Top segment: VIP (35 customers).", "Business kaisa chal raha hai?")
+print("\n--- Final Result ---")
+print(result)
