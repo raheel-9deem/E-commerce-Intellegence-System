@@ -24,11 +24,24 @@ function App() {
   const [segmentCustomers, setSegmentCustomers] = useState(null);
   const [demandProduct, setDemandProduct] = useState('');
   const [demandResult, setDemandResult] = useState(null);
+  const [aiQuestion, setAiQuestion] = useState('');
+  const [aiAnswer, setAiAnswer] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
 
   function fetchForecast() {
     fetch(`${BASE_URL}/sales/forecast?days=${forecastDays}`)
       .then((res) => res.json())
       .then((data) => setForecast(data));
+  }
+
+  function askAI() {
+    setAiLoading(true);
+    fetch(`${BASE_URL}/ai/ask?question=${encodeURIComponent(aiQuestion)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setAiAnswer(data.answer);
+        setAiLoading(false);
+      });
   }
 
   useEffect(() => {
@@ -91,24 +104,35 @@ function App() {
         >
           Overview
         </button>
+
         <button
           onClick={() => setActiveTab('customers')}
           className={`px-4 py-2 rounded ${activeTab === 'customers' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
         >
           Customers
         </button>
+
         <button
           onClick={() => setActiveTab('products')}
           className={`px-4 py-2 rounded ${activeTab === 'products' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
         >
           Products
         </button>
+
         <button
           onClick={() => setActiveTab('sales')}
           className={`px-4 py-2 rounded ${activeTab === 'sales' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
         >
           Sales
         </button>
+
+        <button
+          onClick={() => setActiveTab('ai')}
+          className={`px-4 py-2 rounded ${activeTab === 'ai' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
+        >
+          AI Analyst
+        </button>
+
       </div>
 
       {/* OVERVIEW TAB */}
@@ -238,6 +262,28 @@ function App() {
             renderItem={(item) => `Invoice ${item.Invoice} — Amount: ${item.TotalAmount}`}
           />
         </>
+      )}
+
+      {/* AI ANALYST TAB */}
+      {activeTab === 'ai' && (
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-3">Ask Your Business Data</h2>
+          <SearchBox
+            placeholder="e.g. Top product kaunsa hai?"
+            value={aiQuestion}
+            onChange={(e) => setAiQuestion(e.target.value)}
+            onSearch={askAI}
+            buttonText="Analyze"
+          />
+
+          {aiLoading && <p className="text-gray-500">Analyzing...</p>}
+
+          {aiAnswer && !aiLoading && (
+            <div className="mt-4 p-4 bg-blue-50 rounded text-gray-800 whitespace-pre-line">
+              {aiAnswer}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
