@@ -156,7 +156,7 @@ This means the notebooks aren't just scratch work to throw away — they're the 
 | Backend (FastAPI) | ✅ Done | All ML/analytics modules + AI Analyst exposed via API, CORS-enabled, routes split into per-module files |
 | Frontend (React) | ✅ Done | All endpoints wired up, styled with Tailwind, charted with Recharts, organized into tabs |
 | AI Business Analyst | ✅ Done | Query-templates + LLM phrasing, wired end-to-end into the dashboard |
-| Deployment | ⬜ Not started | Currently local-only (`localhost`) |
+| Deployment | 🟡 In progress | Backend prepped for deployment (auto-seed on startup); not yet live — see [Roadmap](#roadmap) |
 
 ### Backend — complete
 
@@ -249,16 +249,13 @@ Run `notebooks/01` through `09` in order — later notebooks depend on earlier o
 
 ## Running the Backend
 
+`backend/main.py` now calls `initialize_database()` on import — it creates the tables (if they don't exist) and seeds them from the processed CSVs (only if the `Customer` table is empty), so a fresh clone just needs:
+
 ```bash
-# 1. Create the database tables (creates ecommerce.db)
-python -m backend.create_tables
-
-# 2. Seed the database from the processed CSVs
-python -m backend.seed_data
-
-# 3. Start the API server (auto-reloads on code changes)
 uvicorn backend.main:app --reload
 ```
+
+The old two-step `python -m backend.create_tables` + `python -m backend.seed_data` scripts still work standalone (useful for manually resetting the DB — delete `ecommerce.db` and re-run them, or just delete `ecommerce.db` and restart the server, since startup will recreate and reseed it automatically), but are no longer required for a normal run. This auto-seed-on-startup behavior was added specifically for deployment: platforms like Render give the backend an ephemeral filesystem, so `ecommerce.db` is wiped on every restart — without auto-seeding, the API would come back up with an empty database after every redeploy or restart.
 
 Once running, open:
 
@@ -343,7 +340,14 @@ Originally scoped as a 4-phase build (3–3.5 hrs/day):
 - **Phase 1 — Foundation + Customer Intelligence:** Data cleaning, EDA, RFM segmentation, backend skeleton *(done)*
 - **Phase 2 — Predictive Intelligence:** Churn prediction, CLV, product recommendations *(done — notebooks + backend + frontend)*
 - **Phase 3 — Forecasting & Anomaly Detection:** Sales forecasting, anomaly detection *(done — notebooks + backend + frontend)*
-- **Phase 4 — AI Analyst + Dashboard:** Natural-language business Q&A, full dashboard, deployment *(AI Analyst + dashboard done; deployment not started)*
+- **Phase 4 — AI Analyst + Dashboard:** Natural-language business Q&A, full dashboard, deployment *(AI Analyst + dashboard done; deployment in progress — backend prepped, not yet live)*
+
+### Deployment plan
+
+- **Backend** → Render or Railway (free tier), deployed straight from this GitHub repo
+- **Frontend** → Vercel or Netlify, deployed straight from this GitHub repo
+- **Docker is intentionally not used** — Render/Vercel-style platforms build directly from a GitHub repo without needing a container image; Docker would add setup complexity without benefit for this deployment path (the `docker/` folder stays reserved for a future, self-hosted deployment scenario)
+- Once the frontend has a live URL, it needs to be added to `allow_origins` in `backend/main.py`'s CORS config alongside the `localhost` entries
 
 ---
 

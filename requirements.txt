@@ -1,6 +1,7 @@
 # Data handling
 # Note: pandas 2.3.3+ is the first version with official Python 3.14 wheels — pinning
-# to 2.2.x forces pip to compile from source, which fails without build tools.
+# to an older exact version can force pip to compile from source, which fails without
+# build tools on Windows.
 pandas>=2.3.3
 numpy>=2.1.0
 
@@ -25,8 +26,11 @@ pydantic>=2.7.4
 sqlalchemy>=2.0.31
 python-dotenv>=1.0.1
 
-# AI / LLM
-anthropic>=0.34.0
+# AI Business Analyst
+# Uses the Anthropic SDK pointed at a third-party, Anthropic-API-compatible
+# provider via a custom base_url (see ai/llm_client/client.py) — not Anthropic's
+# own servers. Key is read from .env as ANTHROPIC_API_KEY.
+anthropic>=0.40.0
 
 # --- Not yet used, needed for future phases ---
 # PostgreSQL (production database — SQLite used for local dev)
