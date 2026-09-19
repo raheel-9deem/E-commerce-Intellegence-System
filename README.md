@@ -361,7 +361,7 @@ These were consciously cut or simplified to fit the project's timeline — not o
 - **Full BG/NBD CLV model** — a formula-based CLV (`AvgOrderValue × Frequency × Estimated Lifespan`) is used instead
 - **Hybrid recommendation engine** — popularity-based + item-based collaborative filtering only
 - **PostgreSQL in production** — SQLite is used for local development; the swap is a one-line change thanks to SQLAlchemy, but hasn't been done yet
-- **Free-text/open-ended AI questions beyond the 3 query templates** — the AI Analyst answers well when the question relates to top products, monthly sales, or segment value, because those are the stats it's given; questions outside that scope will get a plausible-sounding but ungrounded answer, since there's no retrieval step to pull in other data
+- **Free-text/open-ended AI questions beyond the 3 query templates** — the AI Analyst answers well when the question relates to top products, monthly sales, or segment value, because those are the stats it's given; questions outside that scope will get a plausible-sounding but ungrounded answer, since there's no retrieval step to pull in other data.
 
 ---
 
