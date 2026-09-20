@@ -126,7 +126,8 @@ ai-ecommerce/
 │   ├── test_ai_manual.py         # Confirms the LLM client can reach the provider and get a response
 │   └── test_templates.py         # Confirms the query-template stat functions compute correctly
 │
-├── docker/                       # Optional containerization (not yet used)
+├── Dockerfile                    # Backend containerization — python:3.11-slim base, runs uvicorn on 0.0.0.0:8000
+├── .dockerignore                 # Excludes venv/, node_modules/, __pycache__/, *.db, frontend/, notebooks/, .git/, .env from the image
 │
 ├── .env                          # ANTHROPIC_API_KEY (third-party provider key — see note above); gitignored
 ├── .gitignore
@@ -156,7 +157,7 @@ This means the notebooks aren't just scratch work to throw away — they're the 
 | Backend (FastAPI) | ✅ Done | All ML/analytics modules + AI Analyst exposed via API, CORS-enabled, routes split into per-module files |
 | Frontend (React) | ✅ Done | All endpoints wired up, styled with Tailwind, charted with Recharts, organized into tabs |
 | AI Business Analyst | ✅ Done | Query-templates + LLM phrasing, wired end-to-end into the dashboard |
-| Deployment | 🟡 In progress | Backend prepped for deployment (auto-seed on startup); not yet live — see [Roadmap](#roadmap) |
+| Deployment | ✅ Done (scope: containerized, not hosted) | Backend containerized with Docker and verified locally; auto-seeds on startup; not pushed to a live host (Render/Vercel) — see note below |
 
 ### Backend — complete
 
@@ -179,6 +180,22 @@ Deliberately built as **templates + LLM phrasing**, not RAG with a vector databa
 2. **`ai/llm_client/client.py`** — `ask_claude(stats_summary, question)`: builds a prompt from the stats + the user's question, sends it to the LLM, returns the plain-text answer. Uses `max_tokens=1024` — a lower value (300) was tried first and truncated responses before any answer text was produced (the model's `stop_reason` came back as `max_tokens` with empty text), so it was raised.
 3. **`backend/api/ai_analyst.py`** — `GET /ai/ask?question=...`: runs all three templates, concatenates the stats, calls `ask_claude`, returns `{question, answer}`.
 4. **Frontend "AI Analyst" tab** — a `SearchBox` for the question, a loading state while the request is in flight, and the answer rendered with `whitespace-pre-line` so the model's formatting (headings, bullet points) is preserved instead of collapsing onto one line.
+
+---
+
+### Containerization — complete (Docker, not hosted)
+
+The backend is packaged into a Docker image so it runs identically anywhere Docker is available, independent of the host machine's Python version or installed packages:
+
+- **`Dockerfile`** (project root): based on `python:3.11-slim`, copies `requirements.txt` first and installs it in its own layer *before* copying the rest of the code — so a code-only change doesn't force a full dependency reinstall on rebuild, only a full `requirements.txt` change does. Runs `uvicorn backend.main:app --host 0.0.0.0 --port 8000` (`0.0.0.0`, not `localhost`, so the server accepts connections from outside the container).
+- **`.dockerignore`**: excludes `venv/`, `node_modules/`, `__pycache__/`, `*.db`, `frontend/`, `notebooks/`, `.git/`, and `.env` from the build context, keeping the image smaller and keeping secrets out of it.
+- Built and run locally with:
+  ```bash
+  docker build -t ecommerce-backend .
+  docker run -p 8000:8000 --env-file .env ecommerce-backend
+  ```
+  `-p 8000:8000` maps the container's port to the host's; `--env-file .env` injects the `.env` variables (notably `ANTHROPIC_API_KEY`) into the container, since `.env` is deliberately excluded from the image itself.
+- **Scope note:** the image was built and verified running locally; it was **not** pushed to a container registry or deployed to a live host (Render, Railway, Fly.io, etc.). The project's code and infrastructure are deployment-ready — this was a deliberate stopping point, not a blocker.
 
 ---
 
@@ -266,6 +283,13 @@ If you change the `Customer` model's columns, the database schema does **not** u
 
 **Verifying the AI Analyst independently:** `python -m tests.test_templates` runs the query-template functions (and, if `ai/llm_client` is imported in that file, a live LLM call) without needing the full API server up — useful for isolating whether an issue is in the stats computation or the LLM call.
 
+**Alternative: run it in Docker** instead of a local venv:
+```bash
+docker build -t ecommerce-backend .
+docker run -p 8000:8000 --env-file .env ecommerce-backend
+```
+Same result, but fully isolated from whatever Python version/packages are on the host machine — useful for confirming the app works independent of local environment quirks, and this is the same image that would be pushed to a host if this project's deployment scope is ever extended to a live URL.
+
 ---
 
 ## Running the Frontend
@@ -340,14 +364,9 @@ Originally scoped as a 4-phase build (3–3.5 hrs/day):
 - **Phase 1 — Foundation + Customer Intelligence:** Data cleaning, EDA, RFM segmentation, backend skeleton *(done)*
 - **Phase 2 — Predictive Intelligence:** Churn prediction, CLV, product recommendations *(done — notebooks + backend + frontend)*
 - **Phase 3 — Forecasting & Anomaly Detection:** Sales forecasting, anomaly detection *(done — notebooks + backend + frontend)*
-- **Phase 4 — AI Analyst + Dashboard:** Natural-language business Q&A, full dashboard, deployment *(AI Analyst + dashboard done; deployment in progress — backend prepped, not yet live)*
+- **Phase 4 — AI Analyst + Dashboard:** Natural-language business Q&A, full dashboard, deployment *(done — AI Analyst, dashboard, and Docker containerization complete; scope closed without pushing to a live host)*
 
-### Deployment plan
-
-- **Backend** → Render or Railway (free tier), deployed straight from this GitHub repo
-- **Frontend** → Vercel or Netlify, deployed straight from this GitHub repo
-- **Docker is intentionally not used** — Render/Vercel-style platforms build directly from a GitHub repo without needing a container image; Docker would add setup complexity without benefit for this deployment path (the `docker/` folder stays reserved for a future, self-hosted deployment scenario)
-- Once the frontend has a live URL, it needs to be added to `allow_origins` in `backend/main.py`'s CORS config alongside the `localhost` entries
+**Project status: complete**, within the scope described above. The codebase, Docker image, and documentation are in a state where live hosting (Render/Railway for the backend, Vercel/Netlify for the frontend) could be picked up later as a pure infra step — no further code changes would be required, just connecting the existing Dockerfile/repo to a hosting platform and adding its URL to CORS.
 
 ---
 
@@ -361,7 +380,8 @@ These were consciously cut or simplified to fit the project's timeline — not o
 - **Full BG/NBD CLV model** — a formula-based CLV (`AvgOrderValue × Frequency × Estimated Lifespan`) is used instead
 - **Hybrid recommendation engine** — popularity-based + item-based collaborative filtering only
 - **PostgreSQL in production** — SQLite is used for local development; the swap is a one-line change thanks to SQLAlchemy, but hasn't been done yet
-- **Free-text/open-ended AI questions beyond the 3 query templates** — the AI Analyst answers well when the question relates to top products, monthly sales, or segment value, because those are the stats it's given; questions outside that scope will get a plausible-sounding but ungrounded answer, since there's no retrieval step to pull in other data.
+- **Live hosting (Render/Railway/Vercel/Netlify)** — the backend is Dockerized and verified running locally; deployment scope was deliberately closed there rather than pushing to a public URL, since the remaining steps are pure infrastructure (connect the repo to a host, set environment variables there, add the resulting URL to CORS) with no further code to write
+- **Free-text/open-ended AI questions beyond the 3 query templates** — the AI Analyst answers well when the question relates to top products, monthly sales, or segment value, because those are the stats it's given; questions outside that scope will get a plausible-sounding but ungrounded answer, since there's no retrieval step to pull in other data
 
 ---
 
